@@ -1,0 +1,15 @@
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  become: yes
+
+- name: Change shell for current user
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/zsh
+  become: yes
+
+- name: Run a script using an executable in a system path
+  ansible.builtin.shell: sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  become: yes

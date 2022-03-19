@@ -43,5 +43,9 @@
     append: yes
   become: yes
 
+- name: Install Docker Python
+  ansible.builtin.pip:
+    name: docker
+
 - name: Reset connection so docker group is picked up.
   meta: reset_connection
