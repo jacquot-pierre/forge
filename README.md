@@ -11,3 +11,8 @@ Installer extension ansible:
 ```bash
 poetry run ansible-galaxy collection install community.general
 ```
+
+# List proxmox inventory
+```bash
+poetry run ansible-inventory -i inventories/inventory.proxmox.yaml --vars --graph --ask-vault-pass
+```
