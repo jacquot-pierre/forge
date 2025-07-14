@@ -1,0 +1,11 @@
+---
+- name: Install HAProxy
+  hosts: group_haproxy
+  remote_user: root
+
+  tasks:
+  - name: Ensure apache is at the latest version
+    ansible.builtin.apt:
+      name: haproxy
+      state: present
+

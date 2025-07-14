@@ -13,4 +13,5 @@ keyed_groups:
 # Add custom variable using lookup to a group. Here we set ansible facts gather of the LXC/VM (want_facts need to be set to true)
 # The first part retrieve the ip for an LXC and the second part for a VM
 compose:
-  ansible_host: proxmox_net0.ip | default(proxmox_agent_interfaces[1].ip-addresses[0])
+  ansible_host: proxmox_net0.ip 
+# | default(proxmox_agent_interfaces[1].ip-addresses[0])
