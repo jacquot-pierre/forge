@@ -1,0 +1,5 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ proxmox_hostname }}"
+    use: debian

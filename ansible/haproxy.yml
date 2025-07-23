@@ -4,7 +4,7 @@
   remote_user: root
 
   tasks:
-  - name: Ensure apache is at the latest version
+  - name: install HAProxy
     ansible.builtin.apt:
       name: haproxy
       state: present

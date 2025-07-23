@@ -1,0 +1,35 @@
+- name: Install required dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  loop:
+    - curl
+    - dnsmasq
+
+- name: Configure the /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    search_string: "{{ item.ip_address }}"
+    line: "{{ item.ip_address }}     {{ item.domain }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+   - { ip_address: "192.168.1.202", domain: "machikiflix" }
+   - { ip_address: "192.168.1.201", domain: "haproxy" }
+   - { ip_address: "192.168.1.203", domain: "dnsmasq" }
+
+- name: Backup dnsmasq default configuration
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/dnsmasq.conf
+    dest: /etc/dnsmasq.conf.bck
+
+- name: Copy dnsmasq.conf to server
+  ansible.builtin.copy:
+    src: dnsmasq.conf
+    dest: /etc/dnsmasq.conf
+  notify: 
+    - Restart dnsmasq
+
