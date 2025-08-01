@@ -1,0 +1,31 @@
+---
+- name: Update packages and install dependencies
+  ansible.builtin.apt:
+    name:
+      - curl
+      - vim
+      - gpg
+      - ca-certificates
+    state: present
+    update_cache: yes
+
+- name: Download and add Smallstep GPG key
+  ansible.builtin.get_url:
+    url: https://packages.smallstep.com/keys/apt/repo-signing-key.gpg
+    dest: /etc/apt/trusted.gpg.d/smallstep.asc
+    mode: '0644' # Ensure permissions are correct
+
+
+- name: Add Smallstep repository to APT sources
+  ansible.builtin.apt_repository:
+    repo: 'deb [signed-by=/etc/apt/trusted.gpg.d/smallstep.asc] https://packages.smallstep.com/stable/debian debs main'
+    state: present
+    filename: smallstep # Creates /etc/apt/sources.list.d/smallstep.list/etc/apt/trusted.gpg.d/smallstep.asc
+
+- name: Install step-cli and step-ca
+  ansible.builtin.apt:
+    name:
+      - step-cli
+      - step-ca
+    state: present
+    update_cache: yes # Update APT cache after adding the repository
