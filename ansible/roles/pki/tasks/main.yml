@@ -1,4 +1,8 @@
 ---
+- name: Include vault variables
+  ansible.builtin.include_vars:
+    file: vault.yml
+
 - name: Update packages and install dependencies
   ansible.builtin.apt:
     name:
@@ -29,3 +33,20 @@
       - step-ca
     state: present
     update_cache: yes # Update APT cache after adding the repository
+
+- name: Ensure step-ca configuration directory exists
+  ansible.builtin.file:
+    path: /etc/step-ca
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create password file for step-ca
+  ansible.builtin.copy:
+    content: "{{ step_ca_password }}"
+    dest: /etc/step-ca/password.txt
+    owner: root
+    group: root
+    mode: '0600'
+  when: step_ca_password is defined
