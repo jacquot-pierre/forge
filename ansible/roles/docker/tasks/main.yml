@@ -1,0 +1,28 @@
+- name: Download and add Docker GPG key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/debian/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644' # Ensure permissions are correct
+
+- name: Add Smallstep repository to APT sources
+  ansible.builtin.apt_repository:
+    repo: 'deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable'
+    state: present
+    filename: docker
+
+- name: Update packages and install dependencies
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+
+- name: Add the user debian to docker group
+  ansible.builtin.user:
+    name: debian
+    groups: docker
+    append: yes

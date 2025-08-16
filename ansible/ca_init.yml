@@ -1,0 +1,7 @@
+---
+- name: Configure CA
+  hosts: group_ca
+  remote_user: root
+  gather_facts: true
+  roles:
+    - update-ca

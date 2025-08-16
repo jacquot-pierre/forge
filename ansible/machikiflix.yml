@@ -1,0 +1,9 @@
+---
+- name: Configure Machikiflix
+  hosts: machikiflix.guerande.local.net
+  remote_user: root
+  gather_facts: true
+  roles:
+    - common
+    - update-ca
+    - docker
