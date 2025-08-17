@@ -1,11 +1,7 @@
 ---
-- name: Install HAProxy
+- name: Install and configure HAProxy
   hosts: group_haproxy
   remote_user: root
-
-  tasks:
-  - name: install HAProxy
-    ansible.builtin.apt:
-      name: haproxy
-      state: present
+  roles:
+    - haproxy
 
