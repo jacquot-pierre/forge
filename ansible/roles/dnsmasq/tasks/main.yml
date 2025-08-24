@@ -16,14 +16,10 @@
     group: root
     mode: '0644'
   loop:
-  #  - { ip_address: "192.168.1.201", domain: "haproxy" }
-  #  - { ip_address: "192.168.1.202", domain: "machikiflix" }
-  #  - { ip_address: "192.168.1.203", domain: "dnsmasq" }
-  #  - { ip_address: "192.168.1.204", domain: "pki" }
-    - { ip_address: "192.168.0.204", domain: "haproxy" }
-    - { ip_address: "192.168.0.205", domain: "machikiflix" }
-    - { ip_address: "192.168.0.201", domain: "dnsmasq" }
-    - { ip_address: "192.168.0.202", domain: "pki" }
+   - { ip_address: "192.168.1.201", domain: "dnsmasq" }
+   - { ip_address: "192.168.1.202", domain: "haproxy" }
+   - { ip_address: "192.168.1.203", domain: "pki" }
+   - { ip_address: "192.168.1.204", domain: "machikiflix" }
 
 - name: Backup dnsmasq default configuration
   ansible.builtin.copy:
