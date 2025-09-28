@@ -1,0 +1,47 @@
+---
+- name: Include vault variables from pki role
+  ansible.builtin.include_vars:
+    file: roles/pki/vars/vault.yml
+  delegate_to: localhost
+
+- name: Ensure certificate directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_cert_dir }}"
+    state: directory
+    # owner: haproxy
+    # group: haproxy
+    mode: '0750'
+
+- name: Create wildcard certificate for HAProxy
+  block:
+    - name: Create temporary directory for certificate generation
+      ansible.builtin.tempfile:
+        state: directory
+      register: temp_cert_dir
+
+    - name: Write provisioner password to a temporary file
+      ansible.builtin.copy:
+        content: "{{ pki_step_ca_provider_password }}"
+        dest: "{{ temp_cert_dir.path }}/provisioner_password.txt"
+        mode: '0600'
+      no_log: true
+
+    - name: Generate certificate and key
+      ansible.builtin.command: >
+        step ca certificate "*.guerande.local.net"
+        "{{ temp_cert_dir.path }}/cert.crt"
+        "{{ temp_cert_dir.path }}/key.key"
+        --provisioner homelab-acme
+        --provisioner-password-file "{{ temp_cert_dir.path }}/provisioner_password.txt"
+      changed_when: true
+
+    - name: Combine cert and key into a single PEM file for HAProxy
+      ansible.builtin.shell: "cat {{ temp_cert_dir.path }}/cert.crt {{ temp_cert_dir.path }}/key.key > {{ haproxy_cert_path }}"
+      changed_when: true
+
+  always:
+    - name: Clean up temporary directory
+      ansible.builtin.file:
+        path: "{{ temp_cert_dir.path }}"
+        state: absent
+      when: temp_cert_dir.path is defined

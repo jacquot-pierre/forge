@@ -18,3 +18,7 @@
     name: haproxy
     state: started
     enabled: yes
+
+- name: Deploy wildcard certificate
+  ansible.builtin.include_tasks:
+    file: roles/haproxy/tasks/create_certificate.yml
