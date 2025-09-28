@@ -12,36 +12,28 @@
     # group: haproxy
     mode: '0750'
 
-- name: Create wildcard certificate for HAProxy
-  block:
-    - name: Create temporary directory for certificate generation
-      ansible.builtin.tempfile:
-        state: directory
-      register: temp_cert_dir
+- name: Ensure step-ca directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_step_ca_path }}"
+    state: directory
+    mode: '0750'
 
-    - name: Write provisioner password to a temporary file
-      ansible.builtin.copy:
-        content: "{{ pki_step_ca_provider_password }}"
-        dest: "{{ temp_cert_dir.path }}/provisioner_password.txt"
-        mode: '0600'
-      no_log: true
+- name: Write provisioner password to a file
+  ansible.builtin.copy:
+    content: "{{ pki_step_ca_provider_password }}"
+    dest: "{{ haproxy_step_ca_path }}/provisioner_password.txt"
+    mode: '0600'
+  no_log: true
 
-    - name: Generate certificate and key
-      ansible.builtin.command: >
-        step ca certificate "*.guerande.local.net"
-        "{{ temp_cert_dir.path }}/cert.crt"
-        "{{ temp_cert_dir.path }}/key.key"
-        --provisioner homelab-acme
-        --provisioner-password-file "{{ temp_cert_dir.path }}/provisioner_password.txt"
-      changed_when: true
+- name: Generate certificate and key
+  ansible.builtin.command: >
+    step ca certificate "*.guerande.local.net"
+    "{{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt"
+    "{{ haproxy_cert_dir }}/wildcard.guerande.local.net.key"
+    --provisioner homelab-acme
+    --provisioner-password-file "{{ haproxy_step_ca_path }}/provisioner_password.txt"
+  changed_when: true
 
-    - name: Combine cert and key into a single PEM file for HAProxy
-      ansible.builtin.shell: "cat {{ temp_cert_dir.path }}/cert.crt {{ temp_cert_dir.path }}/key.key > {{ haproxy_cert_path }}"
-      changed_when: true
-
-  always:
-    - name: Clean up temporary directory
-      ansible.builtin.file:
-        path: "{{ temp_cert_dir.path }}"
-        state: absent
-      when: temp_cert_dir.path is defined
+- name: Combine cert and key into a single PEM file for HAProxy
+  ansible.builtin.shell: "cat {{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt {{ haproxy_cert_dir }}/wildcard.guerande.local.net.key > {{ haproxy_cert_path }}"
+  changed_when: true
