@@ -8,8 +8,8 @@
   ansible.builtin.file:
     path: "{{ haproxy_cert_dir }}"
     state: directory
-    # owner: haproxy
-    # group: haproxy
+    owner: haproxy
+    group: haproxy
     mode: '0750'
 
 - name: Ensure step-ca directory exists
@@ -30,6 +30,7 @@
     step ca certificate "*.guerande.local.net"
     "{{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt"
     "{{ haproxy_cert_dir }}/wildcard.guerande.local.net.key"
+    --force
     --provisioner homelab-acme
     --provisioner-password-file "{{ haproxy_step_ca_path }}/provisioner_password.txt"
   changed_when: true
@@ -37,3 +38,21 @@
 - name: Combine cert and key into a single PEM file for HAProxy
   ansible.builtin.shell: "cat {{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt {{ haproxy_cert_dir }}/wildcard.guerande.local.net.key > {{ haproxy_cert_path }}"
   changed_when: true
+
+- name: Deploy cert-renewer template service
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - {src: cert-renewer@.service, dest: /etc/systemd/system/cert-renewer@.service}
+    - {src: cert-renewer@.timer, dest: /etc/systemd/system/cert-renewer@.timer}
+
+- name: Starting services to renew certificate wildcard.guerande.local.net
+  ansible.builtin.systemd:
+    name: cert-renewer@wildcard.guerande.local.net.timer
+    state: started
+    enabled: yes
+    daemon_reload: yes

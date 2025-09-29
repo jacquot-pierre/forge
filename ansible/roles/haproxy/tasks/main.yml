@@ -17,7 +17,7 @@
   ansible.builtin.service:
     name: haproxy
     state: started
-    enabled: yes
+    enabled: true
 
 - name: Deploy wildcard certificate
   ansible.builtin.include_tasks:
