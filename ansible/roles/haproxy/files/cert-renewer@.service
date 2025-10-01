@@ -10,9 +10,9 @@ Type=oneshot
 User=root
 
 Environment=STEPPATH=/etc/step-ca \
-            CERT_LOCATION=/etc/step/certs/%i.crt \
-            KEY_LOCATION=/etc/step/certs/%i.key \
-            PEM_LOCATION=/etc/step/certs/%i.pem
+            CERT_LOCATION=/etc/haproxy/certs/%i.crt \
+            KEY_LOCATION=/etc/haproxy/certs/%i.key \
+            PEM_LOCATION=/etc/haproxy/certs/%i.pem
 
 ; ExecCondition checks if the certificate is ready for renewal,
 ; based on the exit status of the command.
