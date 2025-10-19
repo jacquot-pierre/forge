@@ -1,0 +1,12 @@
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker: {}
+
+api:
+  dashboard: true
+
+log:
+  level: INFO
