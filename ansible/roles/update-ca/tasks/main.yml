@@ -11,7 +11,7 @@
       - gpg
       - ca-certificates
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Download and add Smallstep GPG key
   ansible.builtin.get_url:
@@ -30,13 +30,13 @@
     name:
       - step-cli
     state: present
-    update_cache: yes # Update APT cache after adding the repository
+    update_cache: true # Update APT cache after adding the repository
 
 - name: Ensure step-cli is installed
   ansible.builtin.apt:
     name: step-cli
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Ensure .step directory exists for current user
   ansible.builtin.file:
@@ -56,3 +56,5 @@
 - name: Bootstrap step-cli with CA
   ansible.builtin.command:
     cmd: "step certificate install {{ ansible_env.HOME }}/.step/certs/root_ca.crt"
+  register: my_output
+  changed_when: my_output.rc != 0

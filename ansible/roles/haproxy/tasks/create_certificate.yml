@@ -54,5 +54,5 @@
   ansible.builtin.systemd:
     name: cert-renewer@wildcard.guerande.local.net.timer
     state: started
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true

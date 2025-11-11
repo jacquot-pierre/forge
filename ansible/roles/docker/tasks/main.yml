@@ -19,10 +19,10 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Add the user debian to docker group
   ansible.builtin.user:
     name: debian
     groups: docker
-    append: yes
+    append: true
