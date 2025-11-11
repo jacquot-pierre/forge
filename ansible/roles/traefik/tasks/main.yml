@@ -25,6 +25,7 @@
     owner: root
     group: root
     mode: '0644'
+  notify: Restart traefik service
 
 - name: Ensure traefik service is enabled and started
   ansible.builtin.systemd:
@@ -32,4 +33,3 @@
     enabled: true
     state: started
     daemon_reload: true
-  notify: Restart traefik service

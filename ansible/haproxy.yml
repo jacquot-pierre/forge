@@ -3,5 +3,6 @@
   hosts: group_haproxy
   remote_user: root
   roles:
+    - update-ca
     - haproxy
 
