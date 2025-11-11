@@ -11,14 +11,13 @@
       - gpg
       - ca-certificates
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Download and add Smallstep GPG key
   ansible.builtin.get_url:
     url: https://packages.smallstep.com/keys/apt/repo-signing-key.gpg
     dest: /etc/apt/trusted.gpg.d/smallstep.asc
     mode: '0644' # Ensure permissions are correct
-
 
 - name: Add Smallstep repository to APT sources
   ansible.builtin.apt_repository:
@@ -32,7 +31,7 @@
       - step-cli
       - step-ca
     state: present
-    update_cache: yes # Update APT cache after adding the repository
+    update_cache: true # Update APT cache after adding the repository
 
 - name: Ensure step-ca configuration directory exists
   ansible.builtin.file:

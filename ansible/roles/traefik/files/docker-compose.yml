@@ -1,0 +1,19 @@
+services:
+  traefik:
+    image: "traefik:v3.4"
+    container_name: "traefik"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/opt/traefik/traefik.yml:/etc/traefik/traefik.yml"
+  
+
+networks:
+  proxy:
+    name: proxy
