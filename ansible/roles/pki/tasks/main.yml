@@ -64,4 +64,4 @@
   ansible.builtin.systemd:
     name: step-ca
     state: started
-    enabled: yes
+    enabled:  true

@@ -34,12 +34,20 @@ defaults
     errorfile 503 /etc/haproxy/errors/503.http
     errorfile 504 /etc/haproxy/errors/504.http
 
-frontend tls
-    bind *:443
-    mode tcp
-    option tcplog
+frontend http-in
+    bind *:80
+    http-request redirect scheme https unless { ssl_fc }
+
+frontend https-in
+    bind *:443 ssl crt {{ haproxy_cert_path }}
+    
+    # Add security headers
+    http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    http-response set-header X-Frame-Options "SAMEORIGIN"
+    http-response set-header X-Content-Type-Options "nosniff"
+
     default_backend machikiflix_backend
 
 backend machikiflix_backend
-    mode tcp
-    server machikiflix machikiflix.guerande.local.net:443 check
+    mode http
+    server machikiflix machikiflix.guerande.local.net:80 check

@@ -26,9 +26,9 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.whoami.service: whoami
-      traefik.http.routers.whoami.rule: Host('machikiflix.guerande.local.net') && PathPrefix(`/whoami`)
-      traefik.http.services.whoami.loadbalancer.server.port: 2001
+      traefik.http.routers.whoami.rule: Host('machikiflix.guerande.local.net') && PathPrefix('/whoami')
       traefik.http.routers.whoami.entrypoints: "web"
+      traefik.http.services.whoami.loadbalancer.server.port: 2001
 
 networks:
   proxy:
