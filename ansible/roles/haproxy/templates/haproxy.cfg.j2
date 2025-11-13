@@ -50,4 +50,5 @@ frontend https-in
 
 backend machikiflix_backend
     mode http
+    http-request set-header Host machikiflix.guerande.local.net
     server machikiflix machikiflix.guerande.local.net:80 check
