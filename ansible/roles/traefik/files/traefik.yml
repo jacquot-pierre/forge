@@ -5,8 +5,7 @@ entryPoints:
 providers:
   docker: {}
 
-api:
-  dashboard: true
+api: {}
 
 log:
   level: DEBUG

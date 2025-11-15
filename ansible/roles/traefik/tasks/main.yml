@@ -14,6 +14,7 @@
     owner: root
     group: root
     mode: '0644'
+  notify: Restart traefik service
   loop:
     - docker-compose.yml
     - traefik.yml
@@ -31,5 +32,5 @@
   ansible.builtin.systemd:
     name: traefik.service
     enabled: true
-    state: started
+    state: restarted
     daemon_reload: true
