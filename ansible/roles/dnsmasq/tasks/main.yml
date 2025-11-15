@@ -20,17 +20,23 @@
     - { ip_address: "192.168.1.202", domain: "haproxy" }
     - { ip_address: "192.168.1.203", domain: "pki" }
     - { ip_address: "192.168.1.204", domain: "machikiflix" }
+    - { ip_address: "192.168.1.70", domain: "proxmox" }
 
 - name: Backup dnsmasq default configuration
   ansible.builtin.copy:
     remote_src: true
     src: /etc/dnsmasq.conf
     dest: /etc/dnsmasq.conf.bck
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Copy dnsmasq.conf to server
   ansible.builtin.copy:
     src: dnsmasq.conf
     dest: /etc/dnsmasq.conf
-  notify: 
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
     - Restart dnsmasq
-

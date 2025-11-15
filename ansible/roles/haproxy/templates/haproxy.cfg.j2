@@ -46,7 +46,15 @@ frontend https-in
     http-response set-header X-Frame-Options "SAMEORIGIN"
     http-response set-header X-Content-Type-Options "nosniff"
 
+    # Route to proxmox if path starts with /proxmox
+    acl is_proxmox path_beg /proxmox
+    use_backend proxmox_backend if is_proxmox
+
     default_backend machikiflix_backend
+
+backend proxmox_backend
+    mode http
+    server proxmox proxmox.guerande.local.net:8006 check
 
 backend machikiflix_backend
     mode http

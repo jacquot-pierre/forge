@@ -37,3 +37,14 @@ vault_identity_list = pki@~/.ansible_vault_credentials/.ansible_vault_pki.pass
 ```bash
 openssl x509 -in /tmp/ansible.jwp4vv5y/cert.crt -text -noout
 ```
+
+# Generating hashed password
+Install apache2-utils
+```bash
+sudo apt install apache2-utils
+```
+
+Run the command
+```bash
+htpasswd -nb user password
+```
