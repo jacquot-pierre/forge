@@ -9,7 +9,7 @@ StartLimitIntervalSec=0
 Type=oneshot
 User=root
 
-Environment=STEPPATH=/etc/step-ca \
+Environment=STEPPATH=/root/.step \
             CERT_LOCATION=/etc/haproxy/certs/%i.crt \
             KEY_LOCATION=/etc/haproxy/certs/%i.key \
             PEM_LOCATION=/etc/haproxy/certs/%i.pem
@@ -20,7 +20,7 @@ Environment=STEPPATH=/etc/step-ca \
 ExecCondition=/usr/bin/step certificate needs-renewal ${CERT_LOCATION}
 
 ; ExecStart renews the certificate, if ExecStartPre was successful.
-ExecStart=/usr/bin/step ca renew --force ${CERT_LOCATION} ${KEY_LOCATION}
+ExecStart=/usr/bin/step ca renew --ca-url {{ haproxy_ca_url }} --fingerprint {{ pki_server_fingerprint }} --force ${CERT_LOCATION} ${KEY_LOCATION}
 
 ; Try to reload or restart the systemd service that relies on this cert-renewer
 ; If the relying service doesn't exist, forge ahead.

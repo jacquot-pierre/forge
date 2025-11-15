@@ -39,16 +39,21 @@
   ansible.builtin.shell: "cat {{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt {{ haproxy_cert_dir }}/wildcard.guerande.local.net.key > {{ haproxy_cert_path }}"
   changed_when: true
 
-- name: Deploy cert-renewer template service
+- name: Deploy cert-renewer timer
   ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: "cert-renewer@.timer"
+    dest: "/etc/systemd/system/cert-renewer@.timer"
     owner: root
     group: root
     mode: '0644'
-  loop:
-    - {src: cert-renewer@.service, dest: /etc/systemd/system/cert-renewer@.service}
-    - {src: cert-renewer@.timer, dest: /etc/systemd/system/cert-renewer@.timer}
+
+- name: Deploy cert-renewer service
+  ansible.builtin.template:
+    src: cert-renewer@.service.j2
+    dest: /etc/systemd/system/cert-renewer@.service
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Starting services to renew certificate wildcard.guerande.local.net
   ansible.builtin.systemd:
