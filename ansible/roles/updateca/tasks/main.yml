@@ -15,7 +15,7 @@
 
 - name: Download and add Smallstep GPG key
   ansible.builtin.get_url:
-    url: https://packages.smallstep.com/keys/apt/repo-signing-key.gpg
+    url: https://packages.smallstep.com/keys/apt/Frepo-signing-key.gpg
     dest: /etc/apt/trusted.gpg.d/smallstep.asc
     mode: '0644' # Ensure permissions are correct
 
@@ -53,8 +53,8 @@
     STEPPATH: "{{ ansible_env.HOME }}/.step"
 
 # https://smallstep.com/docs/step-ca/getting-started/#access-your-ca-remotely
-- name: Bootstrap step-cli with CA
+- name: Install root certificate
   ansible.builtin.command:
     cmd: "step certificate install {{ ansible_env.HOME }}/.step/certs/root_ca.crt"
-  register: my_output
-  changed_when: my_output.rc != 0
+  register: updateca_output
+  changed_when: updateca_output.rc != 0

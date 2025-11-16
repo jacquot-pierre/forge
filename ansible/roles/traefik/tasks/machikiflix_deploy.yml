@@ -1,0 +1,13 @@
+---
+- name: Creating necessary folders
+  ansible.builtin.file:
+    path: "{{ traefik_arr_folder }}/sonarr"
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+  loop:
+    - sonarr
+    - radarr
+    - bazarr
+    - prowlarr

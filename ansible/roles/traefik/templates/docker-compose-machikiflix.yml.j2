@@ -1,0 +1,47 @@
+services:
+  sonarr:
+    image: linuxserver/sonarr:4.0.16
+    container_name: "sonarr"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - {{ traefik_arr_folder }}/sonarr/data:/config
+      - {{ traefik_data_sonarr }}:/tv #optional
+      - {{ traefik_data_download }}:/downloads #optional
+    networks:
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.sonarr.service: sonarr
+      traefik.http.routers.sonarr.rule: "Host(`machikiflix.guerande.local.net`) && PathPrefix(`/sonarr`)"
+      traefik.http.routers.sonarr.entrypoints: "web"
+      traefik.http.services.sonarr.loadbalancer.server.port: 8989
+
+  radarr:
+    image: linuxserver/radarr:4.0.16
+    container_name: "radarr"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - {{ traefik_arr_folder }}/radarr/data:/config
+      - {{ traefik_data_radarr }}:/movies #optional
+      - {{ traefik_data_download }}:/downloads #optional
+    networks:
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.radarr.service: radarr
+      traefik.http.routers.radarr.rule: "Host(`machikiflix.guerande.local.net`) && PathPrefix(`/radarr`)"
+      traefik.http.routers.radarr.entrypoints: "web"
+      traefik.http.services.radarr.loadbalancer.server.port: 7878
+
+networks:
+  proxy:
+    name: proxy
+    external: true

@@ -3,5 +3,3 @@
   ansible.builtin.service:
     name: dnsmasq
     state: restarted
-
-    

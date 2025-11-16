@@ -1,1 +1,5 @@
 traefik_main_folder: /opt/traefik/
+traefik_arr_folder: /opt/arr
+traefik_data_sonarr: /data/tvshows
+traefik_data_radarr: /data/movies
+traefik_data_download: /data/downloads
