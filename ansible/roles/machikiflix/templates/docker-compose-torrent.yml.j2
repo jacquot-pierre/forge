@@ -1,0 +1,29 @@
+---
+services:
+  gluetun:
+    image: qmcgaw/gluetun:v3.40.3
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - {{ machikiflix_gluetun_folder }}:/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=airvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY={{ machikiflix_wireguard_private_key }}
+      - WIREGUARD_PRESHARED_KEY={{ machikiflix_wireguard_preshared_key }}
+      - WIREGUARD_ADDRESSES={{ machikiflix_wireguard_addresses }}
+      - SERVER_COUNTRIES=Netherlands
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.qbittorent.service: qbittorent
+      traefik.http.routers.qbittorent.rule: "Host(`machikiflix.guerande.local.net`) && PathPrefix(`/qbittorent`)"
+      traefik.http.routers.qbittorent.entrypoints: "web"
+      traefik.http.services.qbittorent.loadbalancer.server.port: 6767
+
+networks:
+  proxy:
+    name: proxy
+    external: true

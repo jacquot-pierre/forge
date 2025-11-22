@@ -13,17 +13,23 @@
     state: present
     update_cache: true
 
+- name: Gather the apt package facts
+  ansible.builtin.package_facts:
+    manager: apt
+
 - name: Download and add Smallstep GPG key
   ansible.builtin.get_url:
     url: https://packages.smallstep.com/keys/apt/Frepo-signing-key.gpg
     dest: /etc/apt/trusted.gpg.d/smallstep.asc
     mode: '0644' # Ensure permissions are correct
+  when: "'step-cli' not in ansible_facts.packages"
 
 - name: Add Smallstep repository to APT sources
   ansible.builtin.apt_repository:
     repo: 'deb [signed-by=/etc/apt/trusted.gpg.d/smallstep.asc] https://packages.smallstep.com/stable/debian debs main'
     state: present
     filename: smallstep # Creates /etc/apt/sources.list.d/smallstep.list/etc/apt/trusted.gpg.d/smallstep.asc
+  when: "'step-cli' not in ansible_facts.packages"
 
 - name: Install step-cli
   ansible.builtin.apt:

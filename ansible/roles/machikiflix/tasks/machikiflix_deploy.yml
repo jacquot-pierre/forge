@@ -1,7 +1,7 @@
 ---
 - name: Creating necessary folders
   ansible.builtin.file:
-    path: "{{ traefik_arr_folder }}/sonarr"
+    path: "{{ machikiflix_arr_folder }}/sonarr"
     state: directory
     owner: root
     group: root

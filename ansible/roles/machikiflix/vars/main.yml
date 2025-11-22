@@ -1,0 +1,4 @@
+machikiflix_main_folder: /opt/traefik/
+machikiflix_arr_folder: /opt/arr
+machikiflix_gluetun_folder: /opt/gluetun
+machikiflix_data: /data/tvshows

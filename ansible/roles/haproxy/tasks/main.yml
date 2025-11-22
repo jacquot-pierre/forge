@@ -1,8 +1,4 @@
 ---
-- name: Include vault variables from pki roles
-  ansible.builtin.include_vars:
-    file: roles/pki/vars/vault.yml
-
 - name: Install HAProxy
   ansible.builtin.apt:
     name: haproxy

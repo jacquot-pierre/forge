@@ -1,7 +1,7 @@
 ---
 - name: Ensure traefik directories exists
   ansible.builtin.file:
-    path: "{{ traefik_main_folder }}"
+    path: "{{ machikiflix_main_folder }}"
     state: directory
     owner: root
     group: root
@@ -10,7 +10,7 @@
 - name: Copy traefik configuration files
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ traefik_main_folder }}/{{ item }}"
+    dest: "{{ machikiflix_main_folder }}/{{ item }}"
     owner: root
     group: root
     mode: '0644'
