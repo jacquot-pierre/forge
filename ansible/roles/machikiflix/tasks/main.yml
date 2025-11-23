@@ -1,40 +1,51 @@
 ---
-- name: Ensure traefik directories exists
+- name: Creating necessary folders
   ansible.builtin.file:
-    path: "{{ machikiflix_main_folder }}"
+    path: "{{ machikiflix_arr_folder }}/sonarr"
     state: directory
     owner: root
     group: root
     mode: '0755'
-
-- name: Copy traefik configuration files
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ machikiflix_main_folder }}/{{ item }}"
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Restart traefik service
   loop:
-    - docker-compose.yml
-    - traefik.yml
+    - sonarr
+    - radarr
+    - bazarr
+    - prowlarr
 
-- name: Create systemd service for traefik
-  ansible.builtin.template:
-    src: traefik.service.j2
-    dest: /etc/systemd/system/traefik.service
+- name: Créer l'arborescence pour les médias (Torrents, Usenet, Media)
+  ansible.builtin.file:
+    path: "/data/{{ item }}"
+    state: directory
+    mode: '0755'
     owner: root
     group: root
-    mode: '0644'
-  notify: Restart traefik service
+    recurse: false
+  loop:
+    # Torrents
+    - torrents/books
+    - torrents/movies
+    - torrents/music
+    - torrents/tv
+    # Usenet
+    - usenet/incomplete
+    - usenet/complete/books
+    - usenet/complete/movies
+    - usenet/complete/music
+    - usenet/complete/tv
+    # Media
+    - media/booksmachikiflix_deploy
+    - media/movies
+    - media/music
+    - media/tv
 
-- name: Ensure traefik service is enabled and started
-  ansible.builtin.systemd:
-    name: traefik.service
-    enabled: true
-    state: restarted
-    daemon_reload: true
-
-- name: Deploy wildcard certificate
+- name: Deploy servarr apps
   ansible.builtin.include_tasks:
-    file: roles/traefik/tasks/machikiflix_deploy.yml
+    file: roles/traefik/tasks/traefik_deploy.yml
+
+- name: Deploy servarr apps
+  ansible.builtin.include_tasks:
+    file: roles/traefik/tasks/servarr_deploy.yml
+
+- name: Deploy servarr apps
+  ansible.builtin.include_tasks:
+    file: roles/traefik/tasks/torrent_deploy.yml

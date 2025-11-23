@@ -1,5 +1,21 @@
 ---
 - name: Restart traefik service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: traefik.service
     state: restarted
+    daemon_reload: true
+    enabled: true
+
+- name: Restart servarr service
+  ansible.builtin.systemd:
+    name: servarr.service
+    state: restarted
+    daemon_reload: true
+    enabled: true
+
+- name: Restart torrent service
+  ansible.builtin.systemd:
+    name: torrent.service
+    state: restarted
+    daemon_reload: true
+    enabled: true

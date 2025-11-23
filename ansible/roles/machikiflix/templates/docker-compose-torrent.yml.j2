@@ -9,6 +9,9 @@ services:
       - /dev/net/tun:/dev/net/tun
     volumes:
       - {{ machikiflix_gluetun_folder }}:/gluetun
+    ports:
+      - 39269:39269
+      - 39269:39269/udp
     environment:
       - VPN_SERVICE_PROVIDER=airvpn
       - VPN_TYPE=wireguard
@@ -16,12 +19,28 @@ services:
       - WIREGUARD_PRESHARED_KEY={{ machikiflix_wireguard_preshared_key }}
       - WIREGUARD_ADDRESSES={{ machikiflix_wireguard_addresses }}
       - SERVER_COUNTRIES=Netherlands
+      - FIREWALL_VPN_INPUT_PORTS=39269
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:5.1.4
+    container_name: qbittorrent
+    network_mode: "container:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=39269
+    volumes:
+      - /path/to/qbittorrent/appdata:/config
+      - /path/to/downloads:/downloads #optional
+    restart: unless-stopped
     labels:
       traefik.enable: "true"
       traefik.http.routers.qbittorent.service: qbittorent
       traefik.http.routers.qbittorent.rule: "Host(`machikiflix.guerande.local.net`) && PathPrefix(`/qbittorent`)"
       traefik.http.routers.qbittorent.entrypoints: "web"
-      traefik.http.services.qbittorent.loadbalancer.server.port: 6767
+      traefik.http.services.qbittorent.loadbalancer.server.port: 8080
 
 networks:
   proxy:

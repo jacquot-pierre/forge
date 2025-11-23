@@ -1,0 +1,19 @@
+- name: Ensure traefik directories exists
+  ansible.builtin.file:
+    path: "{{ machikiflix_servarr_folder }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create systemd service for traefik
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart servarr service
+  loop:
+    - { src: "servarr.service.j2", dest: "/etc/systemd/system/servarr.service"}
+    - { src: "docker-compose-servarr.yml.j2", dest: "{{ machikiflix_servarr_folder }}/docker-compose.yml" }

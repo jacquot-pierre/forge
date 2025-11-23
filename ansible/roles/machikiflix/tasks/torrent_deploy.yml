@@ -1,0 +1,24 @@
+---
+- name: Include vault variables
+  ansible.builtin.include_vars:
+    file: vault.yml
+
+- name: Ensure traefik directories exists
+  ansible.builtin.file:
+    path: "{{ machikiflix_torrent_folder }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create systemd service for traefik
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart torrent service
+  loop:
+    - { src: "torrent.service.j2", dest: "/etc/systemd/system/torrent.service"}
+    - { src: "docker-compose-torrent.yml.j2", dest: "{{ machikiflix_torrent_folder }}/docker-compose.yml" }
