@@ -32,8 +32,8 @@ services:
       - WEBUI_PORT=8080
       - TORRENTING_PORT=39269
     volumes:
-      - /path/to/qbittorrent/appdata:/config
-      - /path/to/downloads:/downloads #optional
+      - {{ machikiflix_torrent_folder }}/config:/config
+      - {{ machikiflix_data }}/torrents:/data/torrents #optional
     restart: unless-stopped
     labels:
       traefik.enable: "true"

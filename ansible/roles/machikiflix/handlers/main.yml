@@ -19,3 +19,10 @@
     state: restarted
     daemon_reload: true
     enabled: true
+
+- name: Restart media server service
+  ansible.builtin.systemd:
+    name: media-server.service
+    state: restarted
+    daemon_reload: true
+    enabled: true

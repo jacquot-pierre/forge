@@ -1,4 +1,4 @@
-- name: Ensure traefik directories exists
+- name: Ensure servarr directories exists
   ansible.builtin.file:
     path: "{{ machikiflix_servarr_folder }}"
     state: directory
@@ -6,7 +6,7 @@
     group: root
     mode: '0755'
 
-- name: Create systemd service for traefik
+- name: Create systemd service for servarr
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"

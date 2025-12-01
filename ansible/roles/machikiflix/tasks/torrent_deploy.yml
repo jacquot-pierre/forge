@@ -3,7 +3,7 @@
   ansible.builtin.include_vars:
     file: vault.yml
 
-- name: Ensure traefik directories exists
+- name: Ensure torrent directories exists
   ansible.builtin.file:
     path: "{{ machikiflix_torrent_folder }}"
     state: directory
@@ -11,7 +11,7 @@
     group: root
     mode: '0755'
 
-- name: Create systemd service for traefik
+- name: Create systemd service for torrent
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"

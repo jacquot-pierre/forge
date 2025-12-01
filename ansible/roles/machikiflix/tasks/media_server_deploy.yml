@@ -1,0 +1,19 @@
+- name: Ensure media server directories exists
+  ansible.builtin.file:
+    path: "{{ machikiflix_media_server_folder }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create systemd service for media server
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart media server service
+  loop:
+    - { src: "media-server.service.j2", dest: "/etc/systemd/system/media-server.service"}
+    - { src: "docker-compose-media-server.yml.j2", dest: "{{ machikiflix_media_server_folder }}/docker-compose.yml" }

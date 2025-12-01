@@ -27,10 +27,4 @@
     mode: '0644'
   notify: Restart traefik service
 
-- name: Ensure traefik service is enabled and started
-  ansible.builtin.systemd:
-    name: traefik.service
-    enabled: true
-    state: restarted
-    daemon_reload: true
 

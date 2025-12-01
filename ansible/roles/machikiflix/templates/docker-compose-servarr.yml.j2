@@ -9,7 +9,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - {{ machikiflix_arr_folder }}/sonarr/data:/config
+      - {{ machikiflix_arr_folder }}/sonarr/config:/config
       - {{ machikiflix_data }}:/data # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -30,7 +30,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - {{ machikiflix_arr_folder }}/radarr/data:/config
+      - {{ machikiflix_arr_folder }}/radarr/config:/config
       - {{ machikiflix_data }}:/data # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -50,7 +50,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - {{ machikiflix_arr_folder }}/prowlarr/data:/config
+      - {{ machikiflix_arr_folder }}/prowlarr/config:/config
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     networks:
@@ -70,7 +70,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - {{ machikiflix_arr_folder }}/bazarr/data:/config
+      - {{ machikiflix_arr_folder }}/bazarr/config:/config
       - {{ machikiflix_data }}/media:/data/media # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped

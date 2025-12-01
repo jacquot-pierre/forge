@@ -38,7 +38,7 @@
     - media/music
     - media/tv
 
-- name: Deploy servarr apps
+- name: Deploy traefik
   ansible.builtin.include_tasks:
     file: roles/traefik/tasks/traefik_deploy.yml
 
@@ -46,6 +46,10 @@
   ansible.builtin.include_tasks:
     file: roles/traefik/tasks/servarr_deploy.yml
 
-- name: Deploy servarr apps
+- name: Deploy torrent apps
   ansible.builtin.include_tasks:
     file: roles/traefik/tasks/torrent_deploy.yml
+
+- name: Deploy media server apps
+  ansible.builtin.include_tasks:
+    file: roles/traefik/tasks/media_server.yml
