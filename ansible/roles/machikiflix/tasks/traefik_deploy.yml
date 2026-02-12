@@ -8,15 +8,15 @@
 
 - name: Copy traefik configuration files
   ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ machikiflix_traefik_folder }}/{{ item }}"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     owner: root
     group: root
     mode: '0644'
   notify: Restart traefik service
   loop:
-    - docker-compose.yml
-    - traefik.yml
+    - { src: "docker-compose-traefik.yml", dest: "{{ machikiflix_traefik_folder }}/docker-compose.yml"}
+    - { src: "traefik.yml", dest: "{{ machikiflix_traefik_folder }}/traefik.yml" }
 
 - name: Create systemd service for traefik
   ansible.builtin.template:
@@ -26,5 +26,3 @@
     group: root
     mode: '0644'
   notify: Restart traefik service
-
-
