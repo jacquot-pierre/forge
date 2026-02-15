@@ -37,10 +37,10 @@ services:
     restart: unless-stopped
     labels:
       traefik.enable: "true"
-      traefik.http.routers.qbittorent.service: qbittorent
-      traefik.http.routers.qbittorent.rule: "Host(`machikiflix.guerande.local.net`) && PathPrefix(`/qbittorent`)"
-      traefik.http.routers.qbittorent.entrypoints: "web"
-      traefik.http.services.qbittorent.loadbalancer.server.port: 8080
+      traefik.http.routers.qbittorrent.service: qbittorrent
+      traefik.http.routers.qbittorrent.rule: "Host(`qbittorrent.guerande.local.net`)"
+      traefik.http.routers.qbittorrent.entrypoints: "web"
+      traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
 
 networks:
   proxy:
