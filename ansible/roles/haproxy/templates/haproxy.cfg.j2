@@ -50,7 +50,15 @@ frontend https-in
     acl is_proxmox path_beg /proxmox
     use_backend proxmox_backend if is_proxmox
 
-    default_backend machikiflix_backend
+    # Route to machikiflix stack
+    acl is_machikiflix_stack ssl_fc_sni -i machikiflix.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i sonarr.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i radarr.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i prowlarr.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i bazarr.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i qbittorrent.guerande.local.net
+    acl is_machikiflix_stack ssl_fc_sni -i traefik.guerande.local.net
+    use_backend machikiflix_backend if is_machikiflix_stack
 
 backend proxmox_backend
     mode http
@@ -58,5 +66,4 @@ backend proxmox_backend
 
 backend machikiflix_backend
     mode http
-    http-request set-header Host machikiflix.guerande.local.net
     server machikiflix machikiflix.guerande.local.net:80 check

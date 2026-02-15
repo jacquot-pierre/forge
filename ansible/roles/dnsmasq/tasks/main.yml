@@ -21,10 +21,12 @@
   vars:
     hosts_entries:
       - { ip_address: "192.168.1.201", domain: "dnsmasq" }
-      - { ip_address: "192.168.1.202", domain: "haproxy" }
+      - { ip_address: "192.168.1.202", domain: "haproxy sonarr radarr prowlarr bazarr qbittorrent traefik" }
       - { ip_address: "192.168.1.203", domain: "pki" }
-      - { ip_address: "192.168.1.204", domain: "machikiflix sonarr radarr prowlarr bazarr qbittorent traefik" }
+      - { ip_address: "192.168.1.204", domain: "machikiflix" }
       - { ip_address: "192.168.1.70", domain: "proxmox" }
+  notify:
+    - Restart dnsmasq
 
 - name: Backup dnsmasq default configuration
   ansible.builtin.copy:
