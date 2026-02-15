@@ -23,13 +23,7 @@
       - { ip_address: "192.168.1.201", domain: "dnsmasq" }
       - { ip_address: "192.168.1.202", domain: "haproxy" }
       - { ip_address: "192.168.1.203", domain: "pki" }
-      - { ip_address: "192.168.1.204", domain: "machikiflix" }
-      - { ip_address: "192.168.1.204", domain: "sonarr" }
-      - { ip_address: "192.168.1.204", domain: "radarr" }
-      - { ip_address: "192.168.1.204", domain: "prowlarr" }
-      - { ip_address: "192.168.1.204", domain: "bazarr" }
-      - { ip_address: "192.168.1.204", domain: "traefik" }
-      - { ip_address: "192.168.1.204", domain: "qbittorent" }
+      - { ip_address: "192.168.1.204", domain: "machikiflix sonarr radarr prowlarr bazarr qbittorent traefik" }
       - { ip_address: "192.168.1.70", domain: "proxmox" }
 
 - name: Backup dnsmasq default configuration
