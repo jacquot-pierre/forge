@@ -20,11 +20,13 @@ services:
       - WIREGUARD_ADDRESSES={{ machikiflix_wireguard_addresses }}
       - SERVER_COUNTRIES=Netherlands
       - FIREWALL_VPN_INPUT_PORTS=39269
+    networks:
+      - proxy
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:5.1.4
     container_name: qbittorrent
-    network_mode: "container:gluetun"
+    network_mode: "service:gluetun"
     environment:
       - PUID=1000
       - PGID=1000
