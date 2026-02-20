@@ -21,8 +21,12 @@ poetry run ansible-inventory -i inventories/inventory.proxmox.yaml --vars --grap
 ```bash
 poetry run ansible-vault edit inventories/group_vars/all/proxmox.yaml
 ```
-
 # Create a vault id
+```bash
+poetry run ansible-vault create vault.yml --encrypt-vault-id vault_id
+```
+
+# Edit a vault id
 ```bash
 poetry run ansible-vault edit vault.yml --vault-id pki@~/.ansible_vault_credentials/.ansible_vault_pki.pass
 ```
@@ -38,7 +42,7 @@ vault_identity_list = pki@~/.ansible_vault_credentials/.ansible_vault_pki.pass
 openssl x509 -in /tmp/ansible.jwp4vv5y/cert.crt -text -noout
 ```
 
-# Generating hashed password
+# Generating hashed password (for the traefik dashboard)
 Install apache2-utils
 ```bash
 sudo apt install apache2-utils

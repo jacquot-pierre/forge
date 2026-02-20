@@ -4,6 +4,11 @@
     file: roles/pki/vars/vault.yml
   delegate_to: localhost
 
+- name: Include vault variables from haproxy role
+  ansible.builtin.include_vars:
+    file: roles/haproxy/vars/vault.yml
+  delegate_to: localhost
+
 - name: Ensure certificate directory exists
   ansible.builtin.file:
     path: "{{ haproxy_cert_dir }}"
@@ -11,6 +16,49 @@
     owner: haproxy
     group: haproxy
     mode: '0750'
+
+- name: Check if acme.sh is already installed
+  ansible.builtin.stat:
+    path: "/root/.acme.sh/acme.sh"
+  register: acme_sh_stat
+
+- name: Install acme.sh
+  ansible.builtin.shell:
+    cmd: "curl https://get.acme.sh | sh -s email=pierro.jacquot@gmail.com"
+  when: not acme_sh_stat.stat.exists
+
+- name: Add IONOS environment variables to .bashrc
+  ansible.builtin.lineinfile:
+    path: /root/.bashrc
+    line: "{{ item }}"
+    create: true
+    mode: '0600'
+  loop:
+    - 'export IONOS_PREFIX="{{ haproxy_ionos_proxy }}"'
+    - 'export IONOS_SECRET="{{ haproxy_ionos_token }}"'
+
+- name: Issue wildcard certificate via acme.sh
+  ansible.builtin.command:
+    cmd: >
+      /root/.acme.sh/acme.sh --issue 
+      --dns dns_ionos 
+      -d "*.machiki.fr"
+  environment:
+    IONOS_PREFIX: "{{ haproxy_ionos_proxy }}"
+    IONOS_SECRET: "{{ haproxy_ionos_token }}"
+  args:
+    creates: "/root/.acme.sh/*.machiki.fr_ecc/*.machiki.fr.cer"
+
+- name: Install wildcard certificate for HAProxy
+  ansible.builtin.command:
+    cmd: >
+      /root/.acme.sh/acme.sh --install-cert 
+      -d "*.machiki.fr"
+      --fullchain-file /etc/haproxy/certs/wildcard.machiki.fr.crt 
+      --key-file /etc/haproxy/certs/wildcard.machiki.fr.key 
+      --reloadcmd "cat /etc/haproxy/certs/wildcard.machiki.fr.crt /etc/haproxy/certs/wildcard.machiki.fr.key > /etc/haproxy/certs/wildcard.machiki.fr.pem && systemctl reload haproxy"
+  args:
+    creates: "/etc/haproxy/certs/wildcard.machiki.fr.pem"
 
 - name: Ensure step-ca directory exists
   ansible.builtin.file:
@@ -25,7 +73,7 @@
     mode: '0600'
   no_log: true
 
-- name: Generate certificate and key
+- name: Generate step-ca certificate and key (Internal)
   ansible.builtin.command: >
     step ca certificate "*.guerande.local.net"
     "{{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt"
@@ -35,7 +83,7 @@
     --provisioner-password-file "{{ haproxy_step_ca_path }}/provisioner_password.txt"
   changed_when: true
 
-- name: Combine cert and key into a single PEM file for HAProxy
+- name: Combine step-ca cert and key into a single PEM file for HAProxy
   ansible.builtin.shell: "cat {{ haproxy_cert_dir }}/wildcard.guerande.local.net.crt {{ haproxy_cert_dir }}/wildcard.guerande.local.net.key > {{ haproxy_cert_path }}"
   changed_when: true
 
