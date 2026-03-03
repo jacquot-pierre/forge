@@ -66,6 +66,10 @@ frontend https-in
 frontend https-in-machikiflix
     bind *:444 ssl crt /etc/haproxy/certs/wildcard.machiki.fr.pem
     
+    # Reject connections outside local network
+    acl is_local_network src 192.168.0.0/16
+    http-request deny if !is_local_network
+    
     # Add security headers
     http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     http-response set-header X-Frame-Options "SAMEORIGIN"
