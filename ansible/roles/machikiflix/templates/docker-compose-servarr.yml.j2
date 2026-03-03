@@ -17,7 +17,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.sonarr.service: sonarr
-      traefik.http.routers.sonarr.rule: "Host(`sonarr.guerande.local.net`)"
+      traefik.http.routers.sonarr.rule: "Host(`sonarr.guerande.local.net`) || Host(`sonarr.machiki.fr`)"
       traefik.http.routers.sonarr.entrypoints: "web"
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
 
@@ -38,7 +38,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.radarr.service: radarr
-      traefik.http.routers.radarr.rule: "Host(`radarr.guerande.local.net`)"
+      traefik.http.routers.radarr.rule: "Host(`radarr.guerande.local.net`) || Host(`radarr.machiki.fr`)"
       traefik.http.routers.radarr.entrypoints: "web"
       traefik.http.services.radarr.loadbalancer.server.port: 7878
 
@@ -58,7 +58,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.prowlarr.service: prowlarr
-      traefik.http.routers.prowlarr.rule: "Host(`prowlarr.guerande.local.net`)"
+      traefik.http.routers.prowlarr.rule: "Host(`prowlarr.guerande.local.net`) || Host(`prowlarr.machiki.fr`)"
       traefik.http.routers.prowlarr.entrypoints: "web"
       traefik.http.services.prowlarr.loadbalancer.server.port: 9696
 
@@ -79,7 +79,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.bazarr.service: bazarr
-      traefik.http.routers.bazarr.rule: "Host(`bazarr.guerande.local.net`)"
+      traefik.http.routers.bazarr.rule: "Host(`bazarr.guerande.local.net`) || Host(`bazarr.machiki.fr`)"
       traefik.http.routers.bazarr.entrypoints: "web"
       traefik.http.services.bazarr.loadbalancer.server.port: 6767
 

@@ -23,6 +23,7 @@ defaults
     mode    http
     option  httplog
     option  dontlognull
+    option  forwardfor
     timeout connect 5000
     timeout client  50000
     timeout server  50000
@@ -45,6 +46,7 @@ frontend https-in
     http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     http-response set-header X-Frame-Options "SAMEORIGIN"
     http-response set-header X-Content-Type-Options "nosniff"
+    http-request add-header X-Forwarded-Proto https
 
     # Route to proxmox if path starts with /proxmox
     acl is_proxmox path_beg /proxmox
@@ -58,7 +60,26 @@ frontend https-in
     acl is_machikiflix_stack ssl_fc_sni -i bazarr.guerande.local.net
     acl is_machikiflix_stack ssl_fc_sni -i qbittorrent.guerande.local.net
     acl is_machikiflix_stack ssl_fc_sni -i traefik.guerande.local.net
+
     use_backend machikiflix_backend if is_machikiflix_stack
+
+frontend https-in-machikiflix
+    bind *:444 ssl crt /etc/haproxy/certs/wildcard.machiki.fr.pem
+    
+    # Add security headers
+    http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    http-response set-header X-Frame-Options "SAMEORIGIN"
+    http-response set-header X-Content-Type-Options "nosniff"
+    http-request add-header X-Forwarded-Proto https
+
+    acl is_machikiflix_stack ssl_fc_sni -i machikiflix.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i sonarr.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i radarr.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i prowlarr.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i bazarr.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i qbittorrent.machiki.fr
+
+    default_backend machikiflix_backend
 
 backend proxmox_backend
     mode http

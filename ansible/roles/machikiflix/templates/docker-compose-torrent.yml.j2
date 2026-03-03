@@ -40,7 +40,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.qbittorrent.service: qbittorrent
-      traefik.http.routers.qbittorrent.rule: "Host(`qbittorrent.guerande.local.net`)"
+      traefik.http.routers.qbittorrent.rule: "Host(`qbittorrent.guerande.local.net`) || Host(`qbittorrent.machiki.fr`)"
       traefik.http.routers.qbittorrent.entrypoints: "web"
       traefik.http.services.qbittorrent.loadbalancer.server.port: 8080
 
