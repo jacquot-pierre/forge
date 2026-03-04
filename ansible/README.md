@@ -52,3 +52,8 @@ Run the command
 ```bash
 htpasswd -nb user password
 ```
+
+# Connect to qbittorrent via curl
+```bash
+curl -v -i -X POST -d "username=login&password=password" "https:/qbittorrent.machiki.fr:444/api/v2/auth/login"
+```

@@ -2,7 +2,7 @@
 services:
   jellyfin:
     image: jellyfin/jellyfin:10.11
-    container_name: "jellyfin"
+    container_name: "jellyfin_docker"
     restart: unless-stopped
     environment:
       - PUID=1000
@@ -13,6 +13,7 @@ services:
       - {{ machikiflix_media_server_folder }}/cache:/cache
       - {{ machikiflix_data }}/media:/media # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
+      - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
     networks:
       - proxy
     labels:

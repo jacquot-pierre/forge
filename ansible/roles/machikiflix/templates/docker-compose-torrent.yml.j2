@@ -9,6 +9,7 @@ services:
       - /dev/net/tun:/dev/net/tun
     volumes:
       - {{ machikiflix_gluetun_folder }}:/gluetun
+      - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
     ports:
       - 39269:39269
       - 39269:39269/udp
@@ -25,7 +26,7 @@ services:
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:5.1.4
-    container_name: qbittorrent
+    container_name: "qbittorrent_docker"
     network_mode: "service:gluetun"
     environment:
       - PUID=1000
@@ -36,6 +37,7 @@ services:
     volumes:
       - {{ machikiflix_torrent_folder }}/config:/config
       - {{ machikiflix_data }}/torrents:/data/torrents #optional
+      - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
     restart: unless-stopped
     labels:
       traefik.enable: "true"
