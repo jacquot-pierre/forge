@@ -87,6 +87,22 @@ services:
       traefik.http.routers.bazarr.entrypoints: "web"
       traefik.http.services.bazarr.loadbalancer.server.port: 6767
 
+  flaresolverr:
+    # port 8191
+    image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_FILE=none
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=Etc/UTC  
+    volumes:
+      - {{ machikiflix_arr_folder }}/flaresolverr/config:/config
+    restart: unless-stopped
+    networks:
+      - proxy
+
 networks:
   proxy:
     name: proxy
