@@ -13,6 +13,7 @@ services:
       - {{ machikiflix_data }}:/data # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
       - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
+      - "{{ machikiflix_arr_folder }}/update-certs.sh:/custom-cont-init.d/99-update-certs.sh:ro"
     networks:
       - proxy
     labels:
@@ -35,6 +36,7 @@ services:
       - {{ machikiflix_data }}:/data # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
       - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
+      - "{{ machikiflix_arr_folder }}/update-certs.sh:/custom-cont-init.d/99-update-certs.sh:ro"
     networks:
       - proxy
     labels:
@@ -55,6 +57,7 @@ services:
       - {{ machikiflix_arr_folder }}/prowlarr/config:/config
       - /etc/localtime:/etc/localtime:ro
       - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
+      - "{{ machikiflix_arr_folder }}/update-certs.sh:/custom-cont-init.d/99-update-certs.sh:ro"
     restart: unless-stopped
     networks:
       - proxy
@@ -77,6 +80,7 @@ services:
       - {{ machikiflix_data }}/media:/data/media # https://wiki.servarr.com/docker-guide#consistent-and-well-planned-paths
       - /etc/localtime:/etc/localtime:ro
       - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
+      - "{{ machikiflix_arr_folder }}/update-certs.sh:/custom-cont-init.d/99-update-certs.sh:ro"
     restart: unless-stopped
     networks:
       - proxy

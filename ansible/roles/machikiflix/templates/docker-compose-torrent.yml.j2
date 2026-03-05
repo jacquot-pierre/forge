@@ -38,6 +38,7 @@ services:
       - {{ machikiflix_torrent_folder }}/config:/config
       - {{ machikiflix_data }}/torrents:/data/torrents #optional
       - "/root/.step/certs/root_ca.crt:/usr/local/share/ca-certificates/machiki-ca.crt:ro"
+      - "{{ machikiflix_arr_folder }}/update-certs.sh:/custom-cont-init.d/99-update-certs.sh:ro"
     restart: unless-stopped
     labels:
       traefik.enable: "true"

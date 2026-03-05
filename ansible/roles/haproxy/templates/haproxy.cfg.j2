@@ -42,7 +42,7 @@ frontend http-in
     http-request redirect scheme https unless { ssl_fc }
 
 frontend https-in
-    bind *:443 ssl crt {{ haproxy_cert_path }}
+    bind *:444 ssl crt {{ haproxy_cert_path }}
     
     # Add security headers
     http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
@@ -66,7 +66,7 @@ frontend https-in
     use_backend machikiflix_backend if is_machikiflix_stack
 
 frontend https-in-machikiflix
-    bind *:444 ssl crt /etc/haproxy/certs/wildcard.machiki.fr.pem
+    bind *:443 ssl crt /etc/haproxy/certs/wildcard.machiki.fr.pem
     
     # Reject connections outside local network
     acl is_local_network src 192.168.0.0/16 172.20.0.0/24

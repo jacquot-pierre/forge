@@ -38,6 +38,15 @@
     - media/music
     - media/tv
 
+- name: Deploy update CA certs init script
+  ansible.builtin.template:
+    src: update-certs.sh.j2
+    dest: "{{ machikiflix_arr_folder }}/update-certs.sh"
+    owner: root
+    group: root
+    mode: '0755'
+
+
 - name: Deploy traefik
   ansible.builtin.include_tasks:
     file: roles/machikiflix/tasks/traefik_deploy.yml
@@ -54,22 +63,3 @@
   ansible.builtin.include_tasks:
     file: roles/machikiflix/tasks/media_server_deploy.yml
 
-- name: Update CA certificates inside all machikiflix containers
-  ansible.builtin.command:
-    cmd: "docker exec {{ item }} update-ca-certificates"
-  loop:
-    - traefik
-    - jellyfin_docker
-    - sonarr_docker
-    - radarr_docker
-    - prowlarr_docker
-    - bazarr_docker
-    - gluetun
-    - qbittorrent_docker
-  ignore_errors: true
-  register: update_ca_out
-  changed_when: >
-    update_ca_out.stdout is defined and (
-    '1 added' in update_ca_out.stdout or
-    'certificates updated' in update_ca_out.stdout or
-    'Added' in update_ca_out.stdout)
