@@ -24,6 +24,7 @@ defaults
     option  httplog
     # Extended logging for SSL handshake debugging across all proxies
     log-format "%ci:%cp [%tr] %ft %b/%s %TR/%Tw/%Tc/%Tr/%Ta %ST %B %CC %CS %tsc %ac/%fc/%bc/%sc/%rc %sq/%bq %hr %hs %{+Q}r sni=\"%[ssl_fc_sni]\" ssl_v=\"%[ssl_fc_protocol]\" ssl_c=\"%[ssl_fc_cipher]\" ssl_err=\"%[ssl_fc_err]\" ssl_err_str=\"%[ssl_fc_err_str]\""
+    error-log-format "%ci:%cp [%tr] %ft %b/%s ERROR_EARLY sni=\"%[ssl_fc_sni]\" ssl_err_code=\"%[ssl_fc_err]\" ssl_err_str=\"%[ssl_fc_err_str]\""
     option  dontlognull
     option  forwardfor
     timeout connect 5000
@@ -39,7 +40,7 @@ defaults
 
 frontend http-in
     bind *:80
-    http-request redirect scheme https unless { ssl_fc }
+    http-request redirect scheme https code 301 unless { ssl_fc }
 
 frontend https-in
     bind *:444 ssl crt {{ haproxy_cert_path }}
@@ -71,7 +72,7 @@ frontend https-in-machikiflix
     # Reject connections outside local network
     acl is_local_network src 192.168.0.0/16 172.20.0.0/24
     http-request deny if !is_local_network
-    
+
     # Add security headers
     http-response set-header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     http-response set-header X-Frame-Options "SAMEORIGIN"
