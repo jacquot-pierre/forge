@@ -63,7 +63,7 @@ frontend https-in
     acl is_machikiflix_stack ssl_fc_sni -i bazarr.guerande.local.net
     acl is_machikiflix_stack ssl_fc_sni -i qbittorrent.guerande.local.net
     acl is_machikiflix_stack ssl_fc_sni -i traefik.guerande.local.net
-
+    acl is_machikiflix_stack ssl_fc_sni -i pinchflat.guerande.local.net
     use_backend machikiflix_backend if is_machikiflix_stack
 
 frontend https-in-machikiflix
@@ -85,6 +85,7 @@ frontend https-in-machikiflix
     acl is_machikiflix_stack ssl_fc_sni -i prowlarr.machiki.fr
     acl is_machikiflix_stack ssl_fc_sni -i bazarr.machiki.fr
     acl is_machikiflix_stack ssl_fc_sni -i qbittorrent.machiki.fr
+    acl is_machikiflix_stack ssl_fc_sni -i pinchflat.machiki.fr
 
     default_backend machikiflix_backend
 

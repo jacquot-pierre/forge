@@ -3,5 +3,6 @@ machikiflix_servarr_folder: /opt/servarr/
 machikiflix_torrent_folder: /opt/torrent/
 machikiflix_media_server_folder: /opt/media_server
 machikiflix_arr_folder: /opt/arr
+machikiflix_pinchflat_folder: /opt/pinchflat
 machikiflix_gluetun_folder: /opt/gluetun
 machikiflix_data: /data

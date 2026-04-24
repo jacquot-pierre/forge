@@ -1,16 +1,19 @@
 ---
 - name: Creating necessary folders
   ansible.builtin.file:
-    path: "{{ machikiflix_arr_folder }}/sonarr"
+    path: "{{ machikiflix_arr_folder }}"
     state: directory
     owner: root
     group: root
     mode: '0755'
-  loop:
-    - sonarr
-    - radarr
-    - bazarr
-    - prowlarr
+
+- name: Creating necessary folders
+  ansible.builtin.file:
+    path: "{{ machikiflix_pinchflat_folder }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
 - name: Créer l'arborescence pour les médias (Torrents, Usenet, Media)
   ansible.builtin.file:

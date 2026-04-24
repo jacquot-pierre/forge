@@ -90,6 +90,22 @@ services:
       traefik.http.routers.bazarr.rule: "Host(`bazarr.guerande.local.net`) || Host(`bazarr.machiki.fr`)"
       traefik.http.routers.bazarr.entrypoints: "web"
       traefik.http.services.bazarr.loadbalancer.server.port: 6767
+  
+  pinchflat:
+    image: ghcr.io/kieraneglin/pinchflat:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - {{ machikiflix_pinchflat_folder }}/config:/config
+      - {{ machikiflix_data }}/media/:/downloads
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pinchflat.service: bazarr
+      traefik.http.routers.pinchflat.rule: "Host(`pinchflat.guerande.local.net`)"
+      traefik.http.routers.pinchflat.entrypoints: "web"
+      traefik.http.services.pinchflat.loadbalancer.server.port: 8945
 
   flaresolverr:
     # port 8191
