@@ -101,6 +101,9 @@ services:
     volumes:
       - {{ machikiflix_pinchflat_folder }}/config:/config
       - {{ machikiflix_data }}/media/:/downloads
+    restart: unless-stopped
+    networks:
+      - proxy
     labels:
       traefik.enable: "true"
       traefik.http.routers.pinchflat.service: pinchflat
