@@ -104,7 +104,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.pinchflat.service: pinchflat
-      traefik.http.routers.pinchflat.rule: "Host(`pinchflat.guerande.local.net`)"
+      traefik.http.routers.pinchflat.rule: "Host(`pinchflat.guerande.local.net`) || Host(`pinchflat.machiki.fr`)"
       traefik.http.routers.pinchflat.entrypoints: "web"
       traefik.http.services.pinchflat.loadbalancer.server.port: 8945
 
