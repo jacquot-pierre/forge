@@ -103,7 +103,7 @@ services:
       - {{ machikiflix_data }}/media/:/downloads
     labels:
       traefik.enable: "true"
-      traefik.http.routers.pinchflat.service: bazarr
+      traefik.http.routers.pinchflat.service: pinchflat
       traefik.http.routers.pinchflat.rule: "Host(`pinchflat.guerande.local.net`)"
       traefik.http.routers.pinchflat.entrypoints: "web"
       traefik.http.services.pinchflat.loadbalancer.server.port: 8945
