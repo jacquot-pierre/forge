@@ -26,3 +26,6 @@
     state: restarted
     daemon_reload: true
     enabled: true
+
+- name: "pipx ensurepath"
+  ansible.builtin.command: pipx ensurepath

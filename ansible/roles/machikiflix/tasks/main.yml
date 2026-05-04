@@ -49,6 +49,19 @@
     group: root
     mode: '0755'
 
+- name: Install apt dependencies for twitch dl
+  ansible.builtin.apt:
+    name: 
+      - pipx
+      - ffmpeg
+    state: present
+    update_cache: yes
+  notify: "pipx ensurepath"
+
+- name: Installed twitch dl
+  community.general.pipx:
+    name: twitch-dl
+    state: latest
 
 - name: Deploy traefik
   ansible.builtin.include_tasks:
