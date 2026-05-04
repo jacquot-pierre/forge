@@ -1,0 +1,55 @@
+---
+- name: Upgrade all packages
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: true
+    cache_valid_time: 3600
+  when: base_upgrade
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ base_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure QEMU guest agent is running
+  ansible.builtin.systemd_service:
+    name: qemu-guest-agent
+    state: started
+    enabled: true
+
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ base_timezone }}"
+
+- name: Configure automatic security updates
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "{{ base_unattended_upgrades | ternary('1', '0') }}";
+      APT::Periodic::Unattended-Upgrade "{{ base_unattended_upgrades | ternary('1', '0') }}";
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable periodic TRIM (disks are created with discard=on)
+  ansible.builtin.systemd_service:
+    name: fstrim.timer
+    state: started
+    enabled: true
+
+# sshd keeps the first value it reads, 10-* is loaded before cloud-init's 50-cloud-init.conf
+- name: Harden SSH configuration
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/10-forge.conf
+    content: |
+      # Deploy via ansible
+      PasswordAuthentication {{ base_ssh_password_authentication }}
+      KbdInteractiveAuthentication no
+      PermitRootLogin {{ base_ssh_permit_root_login }}
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload ssh

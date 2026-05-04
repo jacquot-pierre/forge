@@ -1,0 +1,21 @@
+---
+base_timezone: Europe/Paris
+
+# Run a full upgrade of the system at each playbook run
+base_upgrade: true
+
+base_packages:
+  - qemu-guest-agent
+  - ca-certificates
+  - curl
+  - gpg
+  - vim
+  - htop
+  - unattended-upgrades
+
+# Automatic security updates (no automatic reboot)
+base_unattended_upgrades: true
+
+# SSH hardening: key only authentication, no direct root login
+base_ssh_password_authentication: "no"
+base_ssh_permit_root_login: "no"
