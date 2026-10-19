@@ -1,0 +1,12 @@
+---
+# Install Docker on cloud-init VMs (run base.yml first).
+# Targets every *running* VM tagged both "base" and "docker" in Proxmox.
+# machikiflix is also tagged "docker" but is managed as root by machikiflix.yml, hence the &group_base.
+- name: Install Docker on cloud-init VMs
+  hosts: group_docker:&group_base:&proxmox_all_running
+  # Default user of the Debian cloud image (cloud-init "ciuser"). Override with ansible_user if needed.
+  remote_user: debian
+  become: true
+  gather_facts: true
+  roles:
+    - docker

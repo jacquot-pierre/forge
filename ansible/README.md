@@ -23,7 +23,7 @@ Deux serveurs Proxmox indépendants sont déclarés, chacun avec ses deux invent
 | Serveur | API | Inventaires |
 |---|---|---|
 | principal | 192.168.1.70:8006 | `inventory_lxc.proxmox.yaml`, `inventory_qemu.proxmox.yaml` |
-| gaming | 192.168.1.125:8006 | `inventory_lxc.proxmox_gaming.yaml`, `inventory_qemu.proxmox_gaming.yaml` |
+| gaming | 192.168.1.125:8006 | `inventory_lxc.gaming.proxmox.yaml`, `inventory_qemu.gaming.proxmox.yaml` |
 
 Les identifiants API des deux serveurs sont dans le même vault `inventories/group_vars/all/proxmox.yaml`.
 
@@ -59,6 +59,16 @@ poetry run ansible-playbook base.yml
 poetry run ansible-playbook base.yml --limit enshrouded
 ```
 Si une VM est recréée avec la même IP, supprimer l'ancienne empreinte SSH : `ssh-keygen -R <ip>`.
+
+# Docker sur les VMs cloud-init
+Le playbook `docker.yml` installe Docker (dépôt officiel, plugin compose) sur les VMs **démarrées** portant
+les tags Proxmox `base` **et** `docker`. Lancer `base.yml` avant.
+L'utilisateur `debian` est ajouté au groupe `docker` (variable `docker_users`).
+
+```bash
+poetry run ansible-playbook docker.yml
+poetry run ansible-playbook docker.yml --limit enshrouded
+```
 
 # Edit a secret vault
 ```bash

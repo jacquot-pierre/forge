@@ -1,3 +1,5 @@
+---
+# Uses facts (distribution_release, architecture): the playbook must gather them
 - name: Ensure APT keyrings directory exists
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -13,7 +15,10 @@
 # Release is read from facts so the role works on Debian 12 (bookworm) and Debian 13 (trixie)
 - name: Add Docker repository to APT sources
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
+    repo: >-
+      deb [arch={{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}
+      signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable
     state: present
     filename: docker
 
@@ -28,8 +33,21 @@
     state: present
     update_cache: true
 
-- name: Add the user debian to docker group
+- name: Ensure docker is running and enabled at boot
+  ansible.builtin.systemd_service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Get existing users
+  ansible.builtin.getent:
+    database: passwd
+
+# ansible.builtin.user would create a missing user (e.g. machikiflix is managed as root)
+- name: Add users to docker group
   ansible.builtin.user:
-    name: debian
+    name: "{{ item }}"
     groups: docker
     append: true
+  loop: "{{ docker_users }}"
+  when: item in ansible_facts['getent_passwd']
