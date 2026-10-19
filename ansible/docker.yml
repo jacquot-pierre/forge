@@ -4,9 +4,12 @@
 # machikiflix is also tagged "docker" but is managed as root by machikiflix.yml, hence the &group_base.
 - name: Install Docker on cloud-init VMs
   hosts: group_docker:&group_base:&proxmox_all_running
-  # Default user of the Debian cloud image (cloud-init "ciuser"). Override with ansible_user if needed.
-  remote_user: debian
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
   become: true
   gather_facts: true
+  vars:
+    # The SSH user can run docker without sudo
+    docker_users:
+      - "{{ ansible_user }}"
   roles:
     - docker

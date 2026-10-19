@@ -49,8 +49,9 @@ mise à jour, paquets de base, qemu-guest-agent, fuseau horaire, mises à jour d
 Il cible les VMs **démarrées** portant le tag Proxmox `base` (groupe `group_base`), sur les deux serveurs.
 Mettre le tag `base` sur le template : chaque clone en hérite.
 
-Prérequis sur la VM : IP fixe dans l'onglet Cloud-Init (`ipconfig0`), utilisateur `debian` avec ta clé SSH
-(sinon surcharger `ansible_user`).
+Prérequis sur la VM : IP fixe dans l'onglet Cloud-Init (`ipconfig0`), utilisateur cloud-init avec ta clé SSH
+(utilisateur SSH défini par serveur via `ansible_user` dans `inventories/group_vars/proxmox_<nœud>_qemu.yaml` :
+`machiki` sur gaming, `root` sur le principal ; avec `root`, le login root par clé reste autorisé).
 
 ```bash
 # Toutes les VMs "base" démarrées
@@ -63,7 +64,7 @@ Si une VM est recréée avec la même IP, supprimer l'ancienne empreinte SSH : `
 # Docker sur les VMs cloud-init
 Le playbook `docker.yml` installe Docker (dépôt officiel, plugin compose) sur les VMs **démarrées** portant
 les tags Proxmox `base` **et** `docker`. Lancer `base.yml` avant.
-L'utilisateur `debian` est ajouté au groupe `docker` (variable `docker_users`).
+L'utilisateur SSH (`ansible_user`) est ajouté au groupe `docker`.
 
 ```bash
 poetry run ansible-playbook docker.yml

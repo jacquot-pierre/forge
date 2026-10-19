@@ -4,8 +4,7 @@
 # Tip: put the "base" tag on the template itself, every clone will inherit it.
 - name: Base configuration of cloud-init VMs
   hosts: group_base:&proxmox_all_running
-  # Default user of the Debian cloud image (cloud-init "ciuser"). Override with ansible_user if needed.
-  remote_user: debian
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
   become: true
   gather_facts: false
   pre_tasks:

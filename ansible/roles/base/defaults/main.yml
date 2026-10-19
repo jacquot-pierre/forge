@@ -17,5 +17,6 @@ base_packages:
 base_unattended_upgrades: true
 
 # SSH hardening: key only authentication, no direct root login
+# (key only root login is kept on VMs managed as root, otherwise ansible would lock itself out)
 base_ssh_password_authentication: "no"
-base_ssh_permit_root_login: "no"
+base_ssh_permit_root_login: "{{ (ansible_user | default('') == 'root') | ternary('prohibit-password', 'no') }}"
