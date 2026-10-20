@@ -4,7 +4,7 @@ enshrouded_dir: /opt/enshrouded
 # The game itself is updated by steamcmd at each container start.
 enshrouded_image: sknnr/enshrouded-dedicated-server:proton-v2.4.0
 
-enshrouded_server_name: Enshrouded Forge
+enshrouded_server_name: Mordeci Forge
 enshrouded_query_port: 15637
 enshrouded_steam_port: 27015
 enshrouded_slots: 16
@@ -33,7 +33,7 @@ enshrouded_user_groups:
     canAccessInventories: true
     canEditWorld: true
     canEditBase: true
-    canExtendBase: false
+    canExtendBase: true
     reservedSlots: 0
 
 enshrouded_banned_accounts: []
