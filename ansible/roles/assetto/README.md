@@ -162,8 +162,10 @@ Commandes admin utiles ([liste complète](https://assettoserver.org/docs/admin-c
 
 ## 5. Se connecter
 
-- **En local** : Content Manager → *Drive* → *Online* → onglet **LAN**, ou ajouter le serveur par `IP:8081`
-  (le port HTTP). Rien à ouvrir sur la box.
+- **En local** : Content Manager → *Drive* → *Online* → **Favourites**, ajouter le serveur par `IP-de-la-VM:8081`
+  (le port HTTP, `HTTP_PORT` dans `server_cfg.ini`), puis *Join*. Selon les versions de Content Manager, un onglet
+  *LAN* peut aussi le détecter tout seul. Rien à ouvrir sur la box. Pour vérifier que le serveur répond, ouvrir
+  `http://IP-de-la-VM:8081/INFO` dans un navigateur : il doit renvoyer un JSON avec le nom du serveur.
 - **Depuis l'extérieur** : rediriger sur la Freebox vers la VM **`9600/tcp`, `9600/udp` et `8081/tcp`**
   (ports par défaut, définis dans `server_cfg.ini` : le conteneur est en réseau `host`). Sans ces redirections, le
   log affiche « INVALID SERVER, CHECK YOUR PORT FORWARDING SETTINGS » : sans importance pour jouer en local.
