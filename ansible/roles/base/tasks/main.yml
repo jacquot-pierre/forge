@@ -39,6 +39,22 @@
     state: started
     enabled: true
 
+- name: Check root SSH authorized keys
+  ansible.builtin.stat:
+    path: /root/.ssh/authorized_keys
+  register: base_root_authorized_keys
+
+# cloud-init (disable_root) prefixes the keys of root with a command that only prints
+# "Please login as the user ... rather than the user root" then disconnects
+- name: Remove cloud-init restriction on root SSH keys
+  ansible.builtin.replace:
+    path: /root/.ssh/authorized_keys
+    regexp: '^no-port-forwarding,.*exit 142" '
+    replace: ''
+  when:
+    - base_ssh_permit_root_login != 'no'
+    - base_root_authorized_keys.stat.exists
+
 # sshd keeps the first value it reads, 10-* is loaded before cloud-init's 50-cloud-init.conf
 - name: Harden SSH configuration
   ansible.builtin.copy:

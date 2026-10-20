@@ -16,7 +16,7 @@ base_packages:
 # Automatic security updates (no automatic reboot)
 base_unattended_upgrades: true
 
-# SSH hardening: key only authentication, no direct root login
-# (key only root login is kept on VMs managed as root, otherwise ansible would lock itself out)
+# SSH hardening: key only authentication, root included (e.g. VS Code Remote-SSH as root)
+# Set base_ssh_permit_root_login to "no" to forbid root login (not on VMs managed as root by ansible)
 base_ssh_password_authentication: "no"
-base_ssh_permit_root_login: "{{ (ansible_user | default('') == 'root') | ternary('prohibit-password', 'no') }}"
+base_ssh_permit_root_login: prohibit-password

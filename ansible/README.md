@@ -1,6 +1,13 @@
 # forge-ansible
 Ansible Forge to deploy infrastructure
 
+# Configuration Ansible
+Le repo est sur `/mnt/z` (dossier accessible en écriture à tous) : Ansible y ignore `ansible.cfg`.
+Le désigner explicitement, une fois pour toutes, dans `~/.bashrc` :
+```bash
+export ANSIBLE_CONFIG=/mnt/z/forge/ansible/ansible.cfg
+```
+
 # Installation des dépendances
 Installer poetry:
 ```bash
@@ -44,14 +51,15 @@ proxmox_gaming_readonly_token_secret: <secret affiché par pveum>
 
 # Configuration de base des VMs cloud-init
 Le playbook `base.yml` configure les VMs clonées depuis le template Debian 13 cloud-init :
-mise à jour, paquets de base, qemu-guest-agent, fuseau horaire, mises à jour de sécurité automatiques, TRIM, durcissement SSH.
+mise à jour, paquets de base, qemu-guest-agent, fuseau horaire, mises à jour de sécurité automatiques, TRIM, durcissement SSH (clé uniquement, root compris).
 
 Il cible les VMs **démarrées** portant le tag Proxmox `base` (groupe `group_base`), sur les deux serveurs.
 Mettre le tag `base` sur le template : chaque clone en hérite.
 
 Prérequis sur la VM : IP fixe dans l'onglet Cloud-Init (`ipconfig0`), utilisateur cloud-init avec ta clé SSH
 (utilisateur SSH défini par serveur via `ansible_user` dans `inventories/group_vars/proxmox_<nœud>_qemu.yaml` :
-`machiki` sur gaming, `root` sur le principal ; avec `root`, le login root par clé reste autorisé).
+`machiki` sur gaming, `root` sur le principal).
+Le login root est autorisé par clé uniquement sur toutes les VMs (`base_ssh_permit_root_login: no` pour l'interdire).
 
 ```bash
 # Toutes les VMs "base" démarrées
@@ -81,14 +89,14 @@ VM taguée `enshrouded` (+ `base`). Image `sknnr/enshrouded-dedicated-server` (P
 par steamcmd à chaque démarrage du conteneur. La configuration (`enshrouded_server.json`) est générée par Ansible
 depuis les variables `enshrouded_*` (voir `roles/enshrouded/defaults/main.yml`), la sauvegarde est dans `/opt/enshrouded/savegame`.
 
-Les mots de passe sont dans un vault dédié (identité `gaming`), à créer une fois :
+Les mots de passe sont dans un vault dédié (identité `enshrouded`), à créer une fois :
 ```bash
-openssl rand -base64 32 > ~/.ansible_vault_credentials/.ansible_vault_gaming.pass && chmod 600 ~/.ansible_vault_credentials/.ansible_vault_gaming.pass
+openssl rand -base64 32 > ~/.ansible_vault_credentials/.ansible_vault_enshrouded.pass && chmod 600 ~/.ansible_vault_credentials/.ansible_vault_enshrouded.pass
 ```
-Ajouter `gaming@~/.ansible_vault_credentials/.ansible_vault_gaming.pass` à `vault_identity_list` dans `ansible.cfg`, puis :
+Ajouter `enshrouded@~/.ansible_vault_credentials/.ansible_vault_enshrouded.pass` à `vault_identity_list` dans `ansible.cfg`, puis :
 ```bash
 mkdir -p inventories/group_vars/group_enshrouded
-poetry run ansible-vault create inventories/group_vars/group_enshrouded/vault.yml --encrypt-vault-id gaming
+poetry run ansible-vault create inventories/group_vars/group_enshrouded/vault.yml --encrypt-vault-id enshrouded
 ```
 ```yaml
 enshrouded_admin_password: <mot de passe admin>
@@ -100,6 +108,8 @@ poetry run ansible-playbook enshrouded.yml
 Ports à rediriger sur la box vers la VM : `15637/udp` (et `27015/udp`).
 
 ## Assetto Corsa (AssettoServer, freeroam)
+Guide complet (installation PC, mods, preset Shutoko, trafic, admin) : [roles/assetto/README.md](roles/assetto/README.md).
+
 VM taguée `assetto` (+ `base`). Image `compujuckel/assettoserver`.
 Le preset du serveur n'est pas dans git (mots de passe, contenu du jeu) : dans Content Manager, onglet Server,
 configurer le serveur puis **Pack**, et extraire l'archive dans `~/assetto-preset` côté WSL
