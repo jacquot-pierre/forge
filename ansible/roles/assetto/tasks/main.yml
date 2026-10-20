@@ -1,0 +1,64 @@
+---
+- name: Check the server preset on the control node
+  ansible.builtin.stat:
+    path: "{{ assetto_preset_dir }}/{{ item }}"
+  loop:
+    - cfg/server_cfg.ini
+    - cfg/entry_list.ini
+    - content
+  register: assetto_preset_files
+  delegate_to: localhost
+  become: false
+
+- name: Fail if the server preset is incomplete
+  ansible.builtin.assert:
+    that: assetto_preset_files.results | rejectattr('stat.exists') | list | length == 0
+    fail_msg: >-
+      Missing in {{ assetto_preset_dir }}:
+      {{ assetto_preset_files.results | rejectattr('stat.exists') | map(attribute='item') | join(', ') }}.
+      Pack the server with Content Manager and extract it there (or set assetto_preset_dir)
+    quiet: true
+
+- name: Install rsync (used to send the server preset)
+  ansible.builtin.apt:
+    name: rsync
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create assetto directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ assetto_dir }}"
+    - "{{ assetto_dir }}/data"
+
+# No delete: files created by the server in data/ (logs, generated extra_cfg.yml...) are kept
+- name: Synchronize server preset (configuration and content)
+  ansible.posix.synchronize:
+    src: "{{ assetto_preset_dir }}/"
+    dest: "{{ assetto_dir }}/data/"
+    owner: false
+    group: false
+    delete: false
+  register: assetto_preset
+
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ assetto_dir }}/compose.yml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Start assetto server
+  community.docker.docker_compose_v2:
+    project_src: "{{ assetto_dir }}"
+    state: present
+    pull: missing
+    # Compose only sees changes of compose.yml, a new preset needs an explicit recreate
+    recreate: "{{ assetto_preset.changed | ternary('always', 'auto') }}"

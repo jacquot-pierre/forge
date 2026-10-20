@@ -1,0 +1,54 @@
+---
+- name: Check that the server passwords are defined
+  ansible.builtin.assert:
+    that:
+      - enshrouded_admin_password is defined
+      - enshrouded_friend_password is defined
+    fail_msg: >-
+      enshrouded_admin_password and enshrouded_friend_password must be defined
+      in the vault inventories/group_vars/group_enshrouded/vault.yml (see README)
+    quiet: true
+
+- name: Create enshrouded directory
+  ansible.builtin.file:
+    path: "{{ enshrouded_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# The container runs as steam (UID/GID 10000) and refuses to start if it can't write its savegame
+- name: Create savegame directory
+  ansible.builtin.file:
+    path: "{{ enshrouded_dir }}/savegame"
+    state: directory
+    owner: 10000
+    group: 10000
+    mode: '0750'
+
+- name: Deploy server configuration
+  ansible.builtin.template:
+    src: enshrouded_server.json.j2
+    dest: "{{ enshrouded_dir }}/enshrouded_server.json"
+    owner: 10000
+    group: 10000
+    mode: '0640'
+  # Contains the passwords
+  diff: false
+  register: enshrouded_config
+
+- name: Deploy compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ enshrouded_dir }}/compose.yml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Start enshrouded server
+  community.docker.docker_compose_v2:
+    project_src: "{{ enshrouded_dir }}"
+    state: present
+    pull: missing
+    # Compose only sees changes of compose.yml, the bind mounted configuration needs an explicit recreate
+    recreate: "{{ enshrouded_config.changed | ternary('always', 'auto') }}"

@@ -71,6 +71,48 @@ poetry run ansible-playbook docker.yml
 poetry run ansible-playbook docker.yml --limit enshrouded
 ```
 
+# Serveurs de jeu (Docker compose, sans unité systemd)
+Chaque jeu a son rôle et son playbook, qui installe aussi Docker. La stack est lancée par le module
+`community.docker.docker_compose_v2` (ne recrée que ce qui a changé), et redémarre au boot grâce à
+`restart: unless-stopped`. Les fichiers sont dans `/opt/<jeu>` sur la VM (`docker compose ps` / `logs -f` depuis ce dossier).
+
+## Enshrouded
+VM taguée `enshrouded` (+ `base`). Image `sknnr/enshrouded-dedicated-server` (Proton), le jeu est mis à jour
+par steamcmd à chaque démarrage du conteneur. La configuration (`enshrouded_server.json`) est générée par Ansible
+depuis les variables `enshrouded_*` (voir `roles/enshrouded/defaults/main.yml`), la sauvegarde est dans `/opt/enshrouded/savegame`.
+
+Les mots de passe sont dans un vault dédié (identité `gaming`), à créer une fois :
+```bash
+openssl rand -base64 32 > ~/.ansible_vault_credentials/.ansible_vault_gaming.pass && chmod 600 ~/.ansible_vault_credentials/.ansible_vault_gaming.pass
+```
+Ajouter `gaming@~/.ansible_vault_credentials/.ansible_vault_gaming.pass` à `vault_identity_list` dans `ansible.cfg`, puis :
+```bash
+mkdir -p inventories/group_vars/group_enshrouded
+poetry run ansible-vault create inventories/group_vars/group_enshrouded/vault.yml --encrypt-vault-id gaming
+```
+```yaml
+enshrouded_admin_password: <mot de passe admin>
+enshrouded_friend_password: <mot de passe joueurs>
+```
+```bash
+poetry run ansible-playbook enshrouded.yml
+```
+Ports à rediriger sur la box vers la VM : `15637/udp` (et `27015/udp`).
+
+## Assetto Corsa (AssettoServer, freeroam)
+VM taguée `assetto` (+ `base`). Image `compujuckel/assettoserver`.
+Le preset du serveur n'est pas dans git (mots de passe, contenu du jeu) : dans Content Manager, onglet Server,
+configurer le serveur puis **Pack**, et extraire l'archive dans `~/assetto-preset` côté WSL
+(ou surcharger `assetto_preset_dir`). Il doit contenir `cfg/server_cfg.ini`, `cfg/entry_list.ini`
+(+ `cfg/extra_cfg.yml` pour les options AssettoServer, sinon généré au premier démarrage) et `content/` (cars, tracks).
+
+Le playbook synchronise ce dossier dans `/opt/assetto/data` (rsync, sans suppression) et recrée le conteneur s'il a changé :
+```bash
+poetry run ansible-playbook assetto.yml
+```
+Le conteneur est en réseau `host` : les ports sont ceux de `server_cfg.ini`. Ports à rediriger par défaut :
+`9600/tcp`, `9600/udp`, `8081/tcp`.
+
 # Edit a secret vault
 ```bash
 poetry run ansible-vault edit inventories/group_vars/all/proxmox.yaml

@@ -1,0 +1,22 @@
+# Deploy via ansible
+services:
+  enshrouded:
+    image: {{ enshrouded_image }}
+    container_name: enshrouded
+    restart: unless-stopped
+    environment:
+      # Configuration comes from enshrouded_server.json, managed by ansible
+      EXTERNAL_CONFIG: "1"
+    ports:
+      - "{{ enshrouded_query_port }}:{{ enshrouded_query_port }}/udp"
+      - "{{ enshrouded_steam_port }}:{{ enshrouded_steam_port }}/udp"
+    volumes:
+      - ./enshrouded_server.json:/home/steam/enshrouded/enshrouded_server.json
+      - ./savegame:/home/steam/enshrouded/savegame
+    # The entrypoint forwards SIGTERM to the server, give it time to save the world
+    stop_grace_period: 2m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

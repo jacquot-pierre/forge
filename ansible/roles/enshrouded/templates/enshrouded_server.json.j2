@@ -1,0 +1,16 @@
+{{ {
+  'name': enshrouded_server_name,
+  'saveDirectory': './savegame',
+  'logDirectory': './logs',
+  'ip': '0.0.0.0',
+  'queryPort': enshrouded_query_port | int,
+  'slotCount': enshrouded_slots | int,
+  'tags': [],
+  'voiceChatMode': 'Proximity',
+  'enableVoiceChat': enshrouded_voice_chat | bool,
+  'enableTextChat': enshrouded_text_chat | bool,
+  'gameSettingsPreset': enshrouded_game_settings_preset,
+  'gameSettings': enshrouded_game_settings,
+  'userGroups': enshrouded_user_groups,
+  'bannedAccounts': enshrouded_banned_accounts,
+} | to_nice_json(indent=2) }}

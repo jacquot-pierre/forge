@@ -1,0 +1,39 @@
+---
+enshrouded_dir: /opt/enshrouded
+# Proton based image (the wine-* tags are no longer maintained).
+# The game itself is updated by steamcmd at each container start.
+enshrouded_image: sknnr/enshrouded-dedicated-server:proton-v2.4.0
+
+enshrouded_server_name: Enshrouded Forge
+enshrouded_query_port: 15637
+enshrouded_steam_port: 27015
+enshrouded_slots: 16
+enshrouded_voice_chat: false
+enshrouded_text_chat: true
+
+# Default, Relaxed, Hard, Survival or Custom (gameSettings are only used with Custom)
+enshrouded_game_settings_preset: Default
+enshrouded_game_settings: {}
+
+# Passwords are defined in the vault: inventories/group_vars/group_enshrouded/vault.yml
+#   enshrouded_admin_password
+#   enshrouded_friend_password
+enshrouded_user_groups:
+  - name: Admin
+    password: "{{ enshrouded_admin_password }}"
+    canKickBan: true
+    canAccessInventories: true
+    canEditWorld: true
+    canEditBase: true
+    canExtendBase: true
+    reservedSlots: 0
+  - name: Friend
+    password: "{{ enshrouded_friend_password }}"
+    canKickBan: false
+    canAccessInventories: true
+    canEditWorld: true
+    canEditBase: true
+    canExtendBase: false
+    reservedSlots: 0
+
+enshrouded_banned_accounts: []

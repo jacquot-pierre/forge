@@ -1,0 +1,10 @@
+---
+assetto_dir: /opt/assetto
+# Only pre-releases are published since 0.0.54 (2023), they are the maintained versions
+assetto_image: compujuckel/assettoserver:0.0.55-pre45
+assetto_timezone: Europe/Paris
+
+# Server preset on the control node, synchronized to the VM (never stored in git: passwords and game content).
+# Content Manager > Server > "Pack", extracted: cfg/ (server_cfg.ini, entry_list.ini, extra_cfg.yml)
+# and content/ (cars/, tracks/). The server ports are read from cfg/server_cfg.ini.
+assetto_preset_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/assetto-preset"
