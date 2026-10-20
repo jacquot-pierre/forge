@@ -123,6 +123,57 @@ ou celui de [SRP](https://discord.gg/shutokorevivalproject), et copie-la dans le
 contresens (`ALLOW_WRONG_WAY`), le changement de couleur partout, la vitesse dans les stands, des points de
 téléportation SRP... C'est enregistré dans `cfg/csp_extra_options.ini`, à garder dans le preset.
 
+**Météo et pluie** : nécessite `EnableWeatherFx: true` dans `extra_cfg.yml` côté serveur, et côté joueurs une version
+de CSP qui gère la pluie (version *preview*, Patreon de CSP) : les autres joueurs restent au sec. Trois façons de faire :
+
+- **Au démarrage** : dans `cfg/server_cfg.ini`, section `[WEATHER_0]`, mettre le type WeatherFX à la fin de `GRAPHICS` :
+  ```ini
+  GRAPHICS=3_clear_type=7
+  ```
+- **À chaud** (admin) : `/cspweather` liste les types, `/setcspweather <type> <transition en s>` en applique un.
+- **Aléatoire** : le plugin `RandomWeatherPlugin` change de météo tout seul (voir l'exemple plus bas).
+
+Types utiles (enum `WeatherFxType`) : `15` Clear, `16` FewClouds, `18` BrokenClouds, `19` OvercastClouds, `20` Fog,
+`3`/`4`/`5` Light/Drizzle/HeavyDrizzle, `6`/`7`/`8` LightRain/Rain/HeavyRain, `0`/`1`/`2` Light/Thunderstorm/HeavyThunderstorm.
+
+Météo aléatoire avec pluie, à ajouter **à la fin** de `extra_cfg.yml` (le `---` sépare la config du plugin) :
+```yaml
+EnablePlugins:
+  - RandomWeatherPlugin
+---
+!RandomWeatherConfiguration
+# Poids de tirage, 0 = jamais. Les types absents ont un poids de 1 : mettre 0 pour neige, sable, tornade...
+WeatherWeights:
+  Clear: 3
+  FewClouds: 2
+  OvercastClouds: 1
+  LightRain: 1
+  Rain: 1
+  HeavyRain: 0.5
+  Thunderstorm: 0.3
+  LightSnow: 0
+  Snow: 0
+  HeavySnow: 0
+  LightSleet: 0
+  Sleet: 0
+  HeavySleet: 0
+  Sand: 0
+  Dust: 0
+  Smoke: 0
+  Squalls: 0
+  Tornado: 0
+  Hurricane: 0
+  Cold: 0
+  Hot: 0
+  Windy: 0
+  Hail: 0
+MinWeatherDurationMinutes: 15
+MaxWeatherDurationMinutes: 60
+MinTransitionDurationSeconds: 180
+MaxTransitionDurationSeconds: 600
+```
+Si `EnablePlugins` existe déjà plus haut dans le fichier, y ajouter la ligne au lieu de le dupliquer.
+
 ### 3.4 Déployer
 
 ```bash
