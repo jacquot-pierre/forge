@@ -11,6 +11,10 @@ services:
       TZ: {{ assetto_timezone }}
     volumes:
       - ./data:/data
+{% if assetto_steamclient_from_steamcmd | bool %}
+      # Not shipped by the image anymore, extracted by ansible from the steamcmd image
+      - ./steam/steamclient.so:/root/.steam/sdk64/steamclient.so:ro
+{% endif %}
     logging:
       driver: json-file
       options:

@@ -37,6 +37,30 @@
     - "{{ assetto_dir }}"
     - "{{ assetto_dir }}/data"
 
+- name: Create steamclient directory
+  ansible.builtin.file:
+    path: "{{ assetto_dir }}/steam"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: assetto_steamclient_from_steamcmd | bool
+
+- name: Extract steamclient.so from the steamcmd image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --volume
+      - "{{ assetto_dir }}/steam:/out"
+      - "{{ assetto_steamcmd_image }}"
+      - cp
+      - /home/steam/steamcmd/linux64/steamclient.so
+      - /out/
+    creates: "{{ assetto_dir }}/steam/steamclient.so"
+  when: assetto_steamclient_from_steamcmd | bool
+
 # No delete: files created by the server in data/ (logs, generated extra_cfg.yml...) are kept
 - name: Synchronize server preset (configuration and content)
   ansible.posix.synchronize:

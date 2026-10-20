@@ -1,7 +1,7 @@
 # Serveur Assetto Corsa freeroam (AssettoServer)
 
-Ce rôle déploie [AssettoServer](https://assettoserver.org) (serveur freeroam avec trafic IA) dans Docker sur la VM
-taguée `assetto`. Objectif de départ : la map **Shutoko Revival Project (SRP)**, l'autoroute de Tokyo, avec du trafic.
+Ce rôle déploie [AssettoServer](https://assettoserver.org) **0.0.54**, la dernière version stable (celle que documente
+le site), en serveur freeroam avec trafic IA, dans Docker sur la VM taguée `assetto`. Objectif de départ : la map **Shutoko Revival Project (SRP)**, l'autoroute de Tokyo, avec du trafic.
 
 Principe : **la configuration du serveur se fait dans Content Manager sur ton PC** (c'est l'outil standard
 d'Assetto Corsa), tu l'exportes avec « Pack » dans un dossier côté WSL, et Ansible l'envoie sur la VM puis lance le conteneur.
@@ -21,7 +21,7 @@ Content Manager ── Pack ──>  ~/assetto-preset/  ── ansible ──>  
 |---|---|---|
 | **Assetto Corsa** | Steam | Le jeu de base suffit pour démarrer. |
 | **Content Manager** | [acstuff.club/app](https://acstuff.club/app/) | Lanceur indispensable. L'onglet *Server* (création et Pack du preset) n'existe que dans la version **complète** (clé reçue par mail après un don, à saisir via le lien rouge *Switch to full version* en haut à droite) ; les joueurs peuvent se contenter de la version Lite gratuite. |
-| **Custom Shaders Patch (CSP)** | Dans Content Manager : *Settings → Custom Shaders Patch* | **Obligatoire** : AssettoServer exige par défaut CSP **0.2.0** minimum (`MinimumCSPVersion`), et l'authentification Steam a besoin de CSP 0.1.75+. La pluie nécessite une version *preview* (Patreon de CSP). |
+| **Custom Shaders Patch (CSP)** | Dans Content Manager : *Settings → Custom Shaders Patch* | **Obligatoire en pratique** : SRP, le trafic et la météo en dépendent ; l'authentification Steam demande CSP 0.1.75+, WeatherFX 0.1.76+, les messages client 0.1.77+. AssettoServer 0.0.54 n'impose pas de version minimale (le guide officiel décrit une astuce pour en exiger une). La pluie nécessite une version *preview* (Patreon de CSP). |
 | **Shutoko Revival Project 0.9.3** | [shutokorevivalproject.com](https://shutokorevivalproject.com/#download) | Version stable actuelle (la 0.9.1 n'est plus supportée). Installer l'archive en la glissant dans Content Manager. Le dossier installé s'appelle `shuto_revival_project_beta`. |
 | **SRP Car Pack** (facultatif) | [SRP_Car_Pack_3.6.7z](https://files.shutokorevivalproject.com/SRP_Car_Pack_3.6.7z) | Les voitures des serveurs officiels SRP. Inutile pour démarrer si tu n'utilises que des voitures Kunos (voir plus bas). |
 
@@ -94,10 +94,15 @@ Il faut **une entrée `AI=none` par joueur pouvant être connecté en même temp
 **`cfg/server_cfg.ini`**, section `[PRACTICE]` : ajouter `INFINITE=1` (session sans fin ; Content Manager affichera quand même un temps restant).
 
 **`cfg/extra_cfg.yml`** : à créer. AssettoServer en génère un complet (avec la description de chaque option) au
-premier démarrage s'il n'existe pas. Les options absentes gardent leur valeur par défaut, ce minimum suffit :
+premier démarrage s'il n'existe pas. Les options absentes gardent leur valeur par défaut ; en 0.0.54, l'authentification
+Steam, WeatherFX et les messages client sont **désactivés par défaut**. Ce minimum suffit :
 ```yaml
 EnableAi: true
+# Indispensable pour admins.txt / whitelist.txt (section 4)
+UseSteamAuth: true
+# Météo CSP (pluie, transitions) et panneaux contresens / phares (CSP requis)
 EnableWeatherFx: true
+EnableClientMessages: true
 EnableServerDetails: true
 ServerDescription: "Shutoko freeroam - Forge"
 AiParams:
@@ -139,7 +144,8 @@ Deux façons, cumulables :
 - **Mot de passe** : en jeu, ouvrir le chat et taper `/admin <mot de passe admin>` (celui du preset, `ADMIN_PASSWORD` dans `server_cfg.ini`).
 - **Automatique** : créer `~/assetto-preset/admins.txt` avec ton **SteamID64** (17 chiffres, visible sur ton profil
   Steam ou via steamid.io), un par ligne. AssettoServer te reconnaît à chaque connexion. Ça repose sur
-  l'authentification Steam (`UseSteamAuth`, activée par défaut) : ne pas la désactiver, sinon n'importe qui pourrait usurper ton SteamID.
+  l'authentification Steam : **`UseSteamAuth: true` obligatoire** dans `extra_cfg.yml` (désactivée par défaut en 0.0.54).
+  Sans elle, n'importe qui pourrait usurper ton SteamID, et le serveur refuse de démarrer avec un `admins.txt` non vide.
 
 Sur le même principe : `whitelist.txt` (seuls ces SteamID peuvent se connecter) et `blacklist.txt` (bannis).
 
@@ -170,6 +176,10 @@ Commandes admin utiles ([liste complète](https://assettoserver.org/docs/admin-c
 - **Crash du client en rejoignant** : *Capacity* supérieure au nombre de stands de la piste.
 - **Seules les premières voitures apparaissent** : *Capacity* inférieure au nombre de voitures de l'entry list.
 - **Le serveur redémarre en boucle** : regarder la première ligne `[FTL]` des logs (spline absente, YAML mal indenté...).
+- **`Failed to load module '/root/.steam/sdk64/steamclient.so'`** : n'arrive pas en 0.0.54. Depuis 0.0.55-pre44,
+  l'image AssettoServer ne contient plus la bibliothèque Steam nécessaire à l'authentification Steam : pour ces
+  versions, mettre `assetto_steamclient_from_steamcmd: true`, le rôle l'extrait alors de l'image `cm2network/steamcmd`
+  dans `/opt/assetto/steam/` et la monte dans le conteneur (supprimer ce dossier pour la mettre à jour).
 - **Mise à jour d'AssettoServer** (variable `assetto_image`) : des options peuvent être renommées. Garder une copie
   de son `extra_cfg.yml` et relire les notes de version avant de changer de version.
 
@@ -178,6 +188,7 @@ Commandes admin utiles ([liste complète](https://assettoserver.org/docs/admin-c
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `assetto_preset_dir` | `~/assetto-preset` (côté WSL) | Dossier du preset à envoyer |
-| `assetto_image` | `compujuckel/assettoserver:0.0.55-pre45` | Version d'AssettoServer (seules des pré-versions sont publiées depuis 0.0.54) |
+| `assetto_image` | `compujuckel/assettoserver:0.0.54` | Version d'AssettoServer (dernière stable ; les suivantes sont des pré-versions `0.0.55-preXX`) |
+| `assetto_steamclient_from_steamcmd` | `false` | Fournir `steamclient.so` au conteneur, nécessaire à partir de `0.0.55-pre44` |
 | `assetto_dir` | `/opt/assetto` | Dossier sur la VM |
 | `assetto_timezone` | `Europe/Paris` | Fuseau du conteneur |
