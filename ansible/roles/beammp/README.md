@@ -17,9 +17,11 @@ Le serveur est installé directement depuis le binaire officiel (pas de Docker :
 
 Il tourne comme service systemd `beammp` (démarrage au boot, relance en cas de crash), sous un utilisateur dédié sans droits.
 
-**Pas de `ServerConfig.toml`** : le serveur réécrit ce fichier à chaque démarrage (AuthKey comprise), Ansible le
-verrait donc toujours modifié. Les réglages passent par les variables `BEAMMP_*` du fichier `beammp.env`
-(mode prévu par le serveur : `BEAMMP_PROVIDER_DISABLE_CONFIG`). Tout se règle avec les variables `beammp_*` du rôle.
+**Pas de `ServerConfig.toml`, c'est normal** : le serveur réécrit ce fichier à chaque démarrage (AuthKey comprise),
+Ansible le verrait donc toujours modifié. Les réglages passent par les variables `BEAMMP_*` du fichier
+`/opt/beammp/beammp.env` (mode prévu par le serveur : `BEAMMP_PROVIDER_DISABLE_CONFIG`), généré par Ansible.
+**Ne pas le modifier sur la VM** : tout se règle avec les variables `beammp_*` (section 4), puis on relance le playbook.
+Pour le consulter : `sudo cat /opt/beammp/beammp.env` (attention, il contient l'AuthKey).
 
 ---
 
