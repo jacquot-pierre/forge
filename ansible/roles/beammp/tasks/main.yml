@@ -81,6 +81,32 @@
   when: beammp_resources.stat.exists
   notify: Restart beammp
 
+- name: Create whitelist plugin directory
+  ansible.builtin.file:
+    path: "{{ beammp_dir }}/server/Resources/Server/Whitelist"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: beammp_whitelist | length > 0
+
+- name: Deploy whitelist plugin
+  ansible.builtin.template:
+    src: whitelist.lua.j2
+    dest: "{{ beammp_dir }}/server/Resources/Server/Whitelist/main.lua"
+    owner: root
+    group: root
+    mode: '0644'
+  when: beammp_whitelist | length > 0
+  notify: Restart beammp
+
+- name: Remove whitelist plugin (empty whitelist)
+  ansible.builtin.file:
+    path: "{{ beammp_dir }}/server/Resources/Server/Whitelist"
+    state: absent
+  when: beammp_whitelist | length == 0
+  notify: Restart beammp
+
 - name: Deploy systemd unit
   ansible.builtin.template:
     src: beammp.service.j2

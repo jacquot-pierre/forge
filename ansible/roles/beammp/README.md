@@ -127,7 +127,29 @@ La synchronisation ne supprime rien : pour retirer un mod, le supprimer aussi su
   (*Paramètres de la Freebox* → *Mode avancé* → *Gestion des ports*), puis donner ton IP publique à tes amis.
   Pour apparaître dans la liste publique, passer `beammp_private: false`.
 
-## 7. Administration
+## 7. Réserver le serveur à ses amis (liste blanche)
+
+BeamMP v3.9.3 n'a **pas de mot de passe** de connexion (l'option est désactivée dans le code du serveur). À la place,
+le rôle déploie un petit plugin Lua (`Resources/Server/Whitelist/main.lua`) qui, à chaque connexion (événement
+`onPlayerAuth`), ne laisse entrer que les **comptes BeamMP** listés :
+
+```yaml
+# inventories/group_vars/group_beammp/main.yml
+beammp_whitelist:
+  - MonPseudoBeamMP
+  - PseudoDunAmi
+```
+puis `poetry run ansible-playbook beammp.yml`.
+
+- La comparaison ignore les majuscules. C'est le **nom du compte BeamMP** (celui du launcher), pas le pseudo Steam.
+- Les **invités** (sans compte) sont toujours refusés : ils choisissent leur nom, n'importe qui pourrait se faire passer pour un ami.
+- Les joueurs refusés voient le message `beammp_whitelist_message` (ou `beammp_whitelist_guest_message`), et le refus
+  est noté dans les logs (`journalctl -u beammp`, lignes `Whitelist: ... refused`).
+- Liste vide (par défaut) : le plugin est supprimé, le serveur est ouvert à tous ceux qui ont son IP.
+
+Penser à **s'ajouter soi-même** à la liste.
+
+## 8. Administration
 
 BeamMP n'a pas de rôle « admin » en jeu par défaut : la modération se fait par la console du serveur ou par un plugin
 Lua serveur (des plugins communautaires ajoutent kick/ban et commandes d'admin dans le chat, à mettre dans
@@ -142,7 +164,7 @@ sudo systemctl restart beammp
 ```
 `Server.log` (dans `/opt/beammp/server/`) contient la même chose ; d'après la documentation BeamMP, il n'affiche jamais l'AuthKey.
 
-## 8. Pièges courants
+## 9. Pièges courants
 
 - **Le service redémarre en boucle** : `journalctl -u beammp` ; le plus fréquent est une AuthKey absente ou invalide
   (« No AuthKey specified » ou clé de la mauvaise longueur).

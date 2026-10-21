@@ -27,6 +27,12 @@ beammp_allow_guests: true
 beammp_log_chat: true
 beammp_debug: false
 
+# BeamMP has no join password: when this list of BeamMP account names is not empty, a server plugin
+# (Resources/Server/Whitelist) refuses everyone else, guests included. Empty = open to everybody.
+beammp_whitelist: []
+beammp_whitelist_message: "Serveur privé : ton compte BeamMP n'est pas sur la liste blanche."
+beammp_whitelist_guest_message: "Serveur privé : connecte-toi avec ton compte BeamMP (pas en invité)."
+
 # The AuthKey (BeamMP Keymaster) is defined in the vault: inventories/group_vars/group_beammp/vault.yml
 #   beammp_auth_key
 
