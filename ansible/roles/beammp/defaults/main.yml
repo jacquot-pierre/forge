@@ -1,0 +1,35 @@
+---
+# BeamMP server (BeamNG.drive multiplayer), official release binary: https://github.com/BeamMP/BeamMP-Server/releases
+# Native binary + systemd unit: BeamMP publishes no official Docker image.
+beammp_version: v3.9.3
+beammp_asset: BeamMP-Server.debian.13.x86_64
+# SHA-256 published by GitHub for this asset: update it together with beammp_version
+beammp_checksum: sha256:be09a7ff522cca6122137420e7854059dfbd479188559ba294130a6d4121a08e
+
+beammp_dir: /opt/beammp
+beammp_user: beammp
+
+# Server settings, passed as BEAMMP_* environment variables (no ServerConfig.toml: the server rewrites it at
+# each start, see templates/beammp.env.j2)
+beammp_name: Mordeci BeamMP
+beammp_description: Freeroam entre amis
+beammp_tags: Freeroam
+# Stock maps: /levels/<map>/info.json, e.g. west_coast_usa, italy, east_coast_usa, utah, jungle_rock_island
+beammp_map: /levels/west_coast_usa/info.json
+beammp_port: 30814
+beammp_max_players: 8
+# Vehicles each player can spawn at the same time
+beammp_max_cars: 2
+# Hidden from the public server list: friends join by IP
+beammp_private: true
+# Players without a BeamMP account
+beammp_allow_guests: true
+beammp_log_chat: true
+beammp_debug: false
+
+# The AuthKey (BeamMP Keymaster) is defined in the vault: inventories/group_vars/group_beammp/vault.yml
+#   beammp_auth_key
+
+# Mods on the control node (never stored in git), synchronized to the server Resources/ folder if it exists:
+#   Client/ = .zip mods (maps, vehicles) downloaded by the players when they join, Server/ = server Lua plugins
+beammp_resources_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/beammp-resources"

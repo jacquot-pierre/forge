@@ -123,6 +123,14 @@ poetry run ansible-playbook assetto.yml
 Le conteneur est en réseau `host` : les ports sont ceux de `server_cfg.ini`. Ports à rediriger par défaut :
 `9600/tcp`, `9600/udp`, `8081/tcp`.
 
+## BeamNG.drive (BeamMP, freeroam)
+VM taguée `beammp` (+ `base`). Binaire officiel BeamMP-Server installé comme service systemd, AuthKey dans le vault
+`inventories/group_vars/group_beammp/vault.yml`. Guide complet (PC des joueurs, AuthKey, réglages, mods, ports) :
+[roles/beammp/README.md](roles/beammp/README.md).
+```bash
+poetry run ansible-playbook beammp.yml
+```
+
 # Edit a secret vault
 ```bash
 poetry run ansible-vault edit inventories/group_vars/all/proxmox.yaml
