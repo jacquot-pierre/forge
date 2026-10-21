@@ -110,13 +110,13 @@ Ports à rediriger sur la box vers la VM : `15637/udp` (et `27015/udp`).
 ## Assetto Corsa (AssettoServer, freeroam)
 Guide complet (installation PC, mods, preset Shutoko, trafic, admin) : [roles/assetto/README.md](roles/assetto/README.md).
 
-VM taguée `assetto` (+ `base`). Image `compujuckel/assettoserver`.
-Le preset du serveur n'est pas dans git (mots de passe, contenu du jeu) : dans Content Manager, onglet Server,
-configurer le serveur puis **Pack**, et extraire l'archive dans `~/assetto-preset` côté WSL
-(ou surcharger `assetto_preset_dir`). Il doit contenir `cfg/server_cfg.ini`, `cfg/entry_list.ini`
-(+ `cfg/extra_cfg.yml` pour les options AssettoServer, sinon généré au premier démarrage) et `content/` (cars, tracks).
+VM taguée `assetto` (+ `base`). Image `compujuckel/assettoserver:0.0.54`.
+La configuration est versionnée dans le rôle (`roles/assetto/files/cfg/`, `templates/cfg/server_cfg.ini.j2`),
+les mots de passe dans le vault `inventories/group_vars/group_assetto/vault.yml` (identité `assetto`).
+Le contenu du jeu (`content/`, `system/`, issus du **Pack** de Content Manager) reste hors de git, dans `~/assetto-preset`
+côté WSL (ou surcharger `assetto_content_dir`).
 
-Le playbook synchronise ce dossier dans `/opt/assetto/data` (rsync, sans suppression) et recrée le conteneur s'il a changé :
+Le playbook envoie le contenu (rsync, sans suppression), dépose la configuration et recrée le conteneur si besoin :
 ```bash
 poetry run ansible-playbook assetto.yml
 ```

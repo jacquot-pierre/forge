@@ -11,7 +11,7 @@ assetto_timezone: Europe/Paris
 assetto_steamclient_from_steamcmd: false
 assetto_steamcmd_image: cm2network/steamcmd:root-trixie
 
-# Server preset on the control node, synchronized to the VM (never stored in git: passwords and game content).
-# Content Manager > Server > "Pack", extracted: cfg/ (server_cfg.ini, entry_list.ini, extra_cfg.yml)
-# and content/ (cars/, tracks/). The server ports are read from cfg/server_cfg.ini.
-assetto_preset_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/assetto-preset"
+# Game content on the control node, synchronized to the VM (never stored in git: copyrighted Kunos/SRP files).
+# Content Manager > Server > "Pack", extracted there: only content/ (cars/, tracks/ with the AI spline) and system/
+# are sent. The configuration (cfg/, admins.txt...) comes from this role: files/, templates/cfg/server_cfg.ini.j2.
+assetto_content_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/assetto-preset"

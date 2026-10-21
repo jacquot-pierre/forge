@@ -3,15 +3,24 @@
 Ce rôle déploie [AssettoServer](https://assettoserver.org) **0.0.54**, la dernière version stable (celle que documente
 le site), en serveur freeroam avec trafic IA, dans Docker sur la VM taguée `assetto`. Objectif de départ : la map **Shutoko Revival Project (SRP)**, l'autoroute de Tokyo, avec du trafic.
 
-Principe : **la configuration du serveur se fait dans Content Manager sur ton PC** (c'est l'outil standard
-d'Assetto Corsa), tu l'exportes avec « Pack » dans un dossier côté WSL, et Ansible l'envoie sur la VM puis lance le conteneur.
-Ce dossier (le « preset ») n'est pas dans git : il contient le mot de passe admin et le contenu du jeu.
+Principe : deux sources, réunies par Ansible sur la VM.
+
+- **La configuration est versionnée dans ce rôle** : `files/cfg/` (`entry_list.ini`, `extra_cfg.yml`...),
+  `templates/cfg/server_cfg.ini.j2` et `files/admins.txt` / `whitelist.txt` / `blacklist.txt`. Les mots de passe de
+  `server_cfg.ini` sont dans le vault `inventories/group_vars/group_assetto/vault.yml` (identité `assetto`).
+- **Le contenu du jeu reste hors de git** (fichiers Kunos et SRP, le dépôt est public) : `content/` (voitures, piste,
+  spline IA) et `system/`, issus du « Pack » de Content Manager, dans `~/assetto-preset` côté WSL.
 
 ```
-PC Windows                          WSL                              VM assetto (192.168.1.x)
-Content Manager ── Pack ──>  ~/assetto-preset/  ── ansible ──>  /opt/assetto/data/  ──>  conteneur AssettoServer
-                              cfg/ + content/      (rsync)        (monté dans /data)
+PC Windows                          WSL                                VM assetto (192.168.1.x)
+Content Manager ── Pack ──>  ~/assetto-preset/content/ ─┐
+                                                        ├─ ansible ─>  /opt/assetto/data/  ──>  conteneur AssettoServer
+                             dépôt : roles/assetto/     ┘              (monté dans /data)
+                             files/cfg/, templates/cfg/, vault
 ```
+
+Pour modifier la configuration : éditer les fichiers du rôle, commiter, `poetry run ansible-playbook assetto.yml`.
+**Ne pas modifier les fichiers de config sur la VM** : ils sont écrasés au déploiement suivant.
 
 ---
 
@@ -39,9 +48,14 @@ Rien à installer à la main, Ansible s'occupe de tout :
    AssettoServer est léger : 2 vCPU et 2 à 4 Go de RAM suffisent pour quelques joueurs (le trafic IA consomme surtout du CPU).
    Le preset « packé » ne contient que les données utiles au serveur (pas les modèles 3D) : +10 Go de disque suffisent.
 2. Démarrer la VM, accepter l'empreinte SSH une fois (`ssh machiki@<ip>`), puis `poetry run ansible-playbook base.yml --limit assetto`.
-3. Préparer le preset (section 3), puis `poetry run ansible-playbook assetto.yml` (installe aussi Docker).
+3. Extraire le contenu du jeu dans `~/assetto-preset` (section 3.2), puis `poetry run ansible-playbook assetto.yml` (installe aussi Docker).
 
 ## 3. Créer le preset SRP avec trafic
+
+La configuration Shutoko + trafic est **déjà dans le rôle** (récupérée du serveur qui tourne). Cette section explique
+comment elle a été créée, et sert à repartir de Content Manager pour un nouveau preset ou pour ajouter des voitures :
+le Pack fournit alors le nouveau `content/`, et on reporte dans le rôle les changements de `cfg/` (sans écraser les
+variables de mot de passe du template).
 
 ### 3.1 Dans Content Manager (onglet *Server*)
 
@@ -69,13 +83,16 @@ D'après le [guide officiel d'AssettoServer](https://assettoserver.org/docs/theb
 mkdir -p ~/assetto-preset
 ```
 Extraire l'archive du pack dedans, **sans dossier intermédiaire** : on doit avoir directement
-`~/assetto-preset/cfg/` et `~/assetto-preset/content/`. Depuis WSL, l'archive Windows est sous `/mnt/c/Users/<toi>/...` :
+`~/assetto-preset/content/`. Seuls `content/` et `system/` sont envoyés sur la VM, le `cfg/` du pack est ignoré
+(la config vient du rôle). Depuis WSL, l'archive Windows est sous `/mnt/c/Users/<toi>/...` :
 ```bash
 cd ~/assetto-preset && unzip /mnt/c/Users/<toi>/Downloads/<preset>.zip
 ```
-(Autre emplacement : surcharger `assetto_preset_dir`.)
+(Autre emplacement : surcharger `assetto_content_dir`.)
 
-### 3.3 Activer le trafic (fichiers du preset)
+### 3.3 Activer le trafic (fichiers de configuration)
+
+Dans le rôle : `cfg/server_cfg.ini` = `templates/cfg/server_cfg.ini.j2`, les autres fichiers `cfg/...` = `files/cfg/...`.
 
 **`cfg/entry_list.ini`** : les voitures des joueurs gardent `AI=none`, celles du trafic passent en `AI=fixed` :
 ```ini
@@ -117,11 +134,12 @@ Le fichier YAML est **sensible à l'indentation** : 2 espaces, jamais de tabulat
 (« No ai folder found »). Elle doit se trouver dans
 `content/tracks/shuto_revival_project_beta/ai/fast_lane.aip`. Vérifie si ton installation de SRP la contient déjà
 (dossier `ai/` de la piste dans Assetto Corsa), sinon récupère-la sur le [Discord d'AssettoServer](https://discord.gg/uXEXRcSkyz)
-ou celui de [SRP](https://discord.gg/shutokorevivalproject), et copie-la dans le preset (créer le dossier `ai`).
+ou celui de [SRP](https://discord.gg/shutokorevivalproject), et copie-la dans `~/assetto-preset/content/...` (créer le dossier `ai`).
+Elle fait partie du contenu : jamais dans git.
 
 **Options CSP** (facultatif) : dans Content Manager, onglet *Entry list*, bouton *CSP* : autoriser la conduite à
 contresens (`ALLOW_WRONG_WAY`), le changement de couleur partout, la vitesse dans les stands, des points de
-téléportation SRP... C'est enregistré dans `cfg/csp_extra_options.ini`, à garder dans le preset.
+téléportation SRP... C'est enregistré dans `cfg/csp_extra_options.ini` : le copier dans `files/cfg/`, il sera déployé automatiquement.
 
 **Météo et pluie** : nécessite `EnableWeatherFx: true` dans `extra_cfg.yml` côté serveur, et côté joueurs une version
 de CSP qui gère la pluie (version *preview*, Patreon de CSP) : les autres joueurs restent au sec. Trois façons de faire :
@@ -179,8 +197,9 @@ Si `EnablePlugins` existe déjà plus haut dans le fichier, y ajouter la ligne a
 ```bash
 poetry run ansible-playbook assetto.yml
 ```
-Le playbook vérifie que le preset est complet, l'envoie dans `/opt/assetto/data` (rsync, sans rien supprimer côté VM),
-et recrée le conteneur si quelque chose a changé. Pour toute modification : éditer le preset, relancer la même commande.
+Le playbook vérifie les mots de passe du vault et la présence du contenu, envoie `content/` et `system/` dans
+`/opt/assetto/data` (rsync, sans rien supprimer côté VM), y dépose la configuration du rôle, et recrée le conteneur si
+quelque chose a changé. Pour toute modification : éditer le rôle, relancer la même commande.
 
 Logs, en SSH sur la VM :
 ```bash
@@ -192,8 +211,9 @@ cd /opt/assetto && docker compose logs -f
 
 Deux façons, cumulables :
 
-- **Mot de passe** : en jeu, ouvrir le chat et taper `/admin <mot de passe admin>` (celui du preset, `ADMIN_PASSWORD` dans `server_cfg.ini`).
-- **Automatique** : créer `~/assetto-preset/admins.txt` avec ton **SteamID64** (17 chiffres, visible sur ton profil
+- **Mot de passe** : en jeu, ouvrir le chat et taper `/admin <mot de passe admin>` (`assetto_admin_password` dans le vault, `ADMIN_PASSWORD` de `server_cfg.ini`).
+  Pour le voir ou le changer : `poetry run ansible-vault edit inventories/group_vars/group_assetto/vault.yml`.
+- **Automatique** : mettre dans `roles/assetto/files/admins.txt` ton **SteamID64** (17 chiffres, visible sur ton profil
   Steam ou via steamid.io), un par ligne. AssettoServer te reconnaît à chaque connexion. Ça repose sur
   l'authentification Steam : **`UseSteamAuth: true` obligatoire** dans `extra_cfg.yml` (désactivée par défaut en 0.0.54).
   Sans elle, n'importe qui pourrait usurper ton SteamID, et le serveur refuse de démarrer avec un `admins.txt` non vide.
@@ -240,7 +260,8 @@ Commandes admin utiles ([liste complète](https://assettoserver.org/docs/admin-c
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `assetto_preset_dir` | `~/assetto-preset` (côté WSL) | Dossier du preset à envoyer |
+| `assetto_content_dir` | `~/assetto-preset` (côté WSL) | Dossier du Pack Content Manager : seuls `content/` et `system/` sont envoyés |
+| `assetto_password`, `assetto_admin_password`, `assetto_ftp_password` | vault `group_assetto` | Mots de passe injectés dans `server_cfg.ini` |
 | `assetto_image` | `compujuckel/assettoserver:0.0.54` | Version d'AssettoServer (dernière stable ; les suivantes sont des pré-versions `0.0.55-preXX`) |
 | `assetto_steamclient_from_steamcmd` | `false` | Fournir `steamclient.so` au conteneur, nécessaire à partir de `0.0.55-pre44` |
 | `assetto_dir` | `/opt/assetto` | Dossier sur la VM |

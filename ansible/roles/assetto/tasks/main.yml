@@ -1,25 +1,31 @@
 ---
-- name: Check the server preset on the control node
+- name: Check that the server passwords are defined
+  ansible.builtin.assert:
+    that:
+      - assetto_password is defined
+      - assetto_admin_password is defined
+      - assetto_ftp_password is defined
+    fail_msg: >-
+      assetto_password, assetto_admin_password and assetto_ftp_password must be defined
+      in the vault inventories/group_vars/group_assetto/vault.yml (see README)
+    quiet: true
+
+- name: Check the game content on the control node
   ansible.builtin.stat:
-    path: "{{ assetto_preset_dir }}/{{ item }}"
-  loop:
-    - cfg/server_cfg.ini
-    - cfg/entry_list.ini
-    - content
-  register: assetto_preset_files
+    path: "{{ assetto_content_dir }}/content"
+  register: assetto_content
   delegate_to: localhost
   become: false
 
-- name: Fail if the server preset is incomplete
+- name: Fail if the game content is missing
   ansible.builtin.assert:
-    that: assetto_preset_files.results | rejectattr('stat.exists') | list | length == 0
+    that: assetto_content.stat.exists
     fail_msg: >-
-      Missing in {{ assetto_preset_dir }}:
-      {{ assetto_preset_files.results | rejectattr('stat.exists') | map(attribute='item') | join(', ') }}.
-      Pack the server with Content Manager and extract it there (or set assetto_preset_dir)
+      {{ assetto_content_dir }}/content not found. Pack the server with Content Manager
+      and extract it there (or set assetto_content_dir)
     quiet: true
 
-- name: Install rsync (used to send the server preset)
+- name: Install rsync (used to send the game content)
   ansible.builtin.apt:
     name: rsync
     state: present
@@ -36,6 +42,7 @@
   loop:
     - "{{ assetto_dir }}"
     - "{{ assetto_dir }}/data"
+    - "{{ assetto_dir }}/data/cfg"
 
 - name: Create steamclient directory
   ansible.builtin.file:
@@ -61,15 +68,54 @@
     creates: "{{ assetto_dir }}/steam/steamclient.so"
   when: assetto_steamclient_from_steamcmd | bool
 
-# No delete: files created by the server in data/ (logs, generated extra_cfg.yml...) are kept
-- name: Synchronize server preset (configuration and content)
+# Only content/ (cars, tracks, AI spline) and system/: the configuration comes from this role.
+# No delete: files created by the server in data/ (logs, cache...) are kept
+- name: Synchronize game content
   ansible.posix.synchronize:
-    src: "{{ assetto_preset_dir }}/"
+    src: "{{ assetto_content_dir }}/"
     dest: "{{ assetto_dir }}/data/"
     owner: false
     group: false
     delete: false
-  register: assetto_preset
+    rsync_opts:
+      - --include=/content/***
+      - --include=/system/***
+      - --exclude=*
+  register: assetto_content_sync
+
+- name: Deploy server configuration
+  ansible.builtin.template:
+    src: cfg/server_cfg.ini.j2
+    dest: "{{ assetto_dir }}/data/cfg/server_cfg.ini"
+    owner: root
+    group: root
+    mode: '0640'
+  # Contains the passwords
+  diff: false
+  register: assetto_server_cfg
+
+# Every file of files/cfg/: entry_list.ini, extra_cfg.yml, csp_extra_options.ini if added...
+- name: Deploy entry list and AssettoServer configuration
+  ansible.builtin.copy:
+    src: cfg/
+    dest: "{{ assetto_dir }}/data/cfg/"
+    owner: root
+    group: root
+    mode: '0644'
+  register: assetto_config_dir
+
+- name: Deploy admin, white and black lists
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ assetto_dir }}/data/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - admins.txt
+    - whitelist.txt
+    - blacklist.txt
+  register: assetto_user_lists
 
 - name: Deploy compose file
   ansible.builtin.template:
@@ -84,5 +130,8 @@
     project_src: "{{ assetto_dir }}"
     state: present
     pull: missing
-    # Compose only sees changes of compose.yml, a new preset needs an explicit recreate
-    recreate: "{{ assetto_preset.changed | ternary('always', 'auto') }}"
+    # Compose only sees changes of compose.yml, new content or configuration needs an explicit recreate
+    recreate: >-
+      {{ (assetto_content_sync.changed or assetto_server_cfg.changed
+          or assetto_config_dir.changed or assetto_user_lists.changed)
+         | ternary('always', 'auto') }}
