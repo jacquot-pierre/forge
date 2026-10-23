@@ -1,0 +1,10 @@
+# Deploy via ansible (role backup_pull)
+[Unit]
+Description=Pull the game save archives from the game VMs
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/local/sbin/backup-pull

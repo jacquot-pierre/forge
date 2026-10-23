@@ -107,6 +107,9 @@ poetry run ansible-playbook enshrouded.yml
 ```
 Ports à rediriger sur la box vers la VM : `15637/udp` (et `27015/udp`).
 
+Sauvegarde du monde : archive toutes les 6 h, récupérée par le Proxmox principal (7 jours de rétention), playbook
+`backup.yml`. Mise en place et restauration : [roles/savegame_backup/README.md](roles/savegame_backup/README.md).
+
 ## Assetto Corsa (AssettoServer, freeroam)
 Guide complet (installation PC, mods, preset Shutoko, trafic, admin) : [roles/assetto/README.md](roles/assetto/README.md).
 

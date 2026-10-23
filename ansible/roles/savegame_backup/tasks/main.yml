@@ -1,0 +1,69 @@
+---
+- name: Check that the backup host key is known
+  ansible.builtin.assert:
+    that: savegame_backup_authorized_key is defined
+    fail_msg: >-
+      savegame_backup_authorized_key is undefined: run the whole backup.yml playbook, the backup host
+      (role backup_pull) must be processed first to provide its public key
+    quiet: true
+
+# rrsync (restricted rsync for forced SSH commands) is part of the rsync package
+- name: Install rsync
+  ansible.builtin.apt:
+    name: rsync
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# Shell needed to run the forced command; '*' = no password but not locked, so key authentication works
+- name: Create the restricted backup user
+  ansible.builtin.user:
+    name: "{{ savegame_backup_user }}"
+    system: true
+    shell: /bin/sh
+    password: "*"
+    home: "/var/lib/{{ savegame_backup_user }}"
+    create_home: true
+
+- name: Allow the backup host to read the archives only
+  ansible.posix.authorized_key:
+    user: "{{ savegame_backup_user }}"
+    key: "{{ savegame_backup_authorized_key }}"
+    key_options: 'command="/usr/bin/rrsync -ro {{ savegame_backup_dir }}",restrict'
+    exclusive: true
+
+- name: Create the archive directory
+  ansible.builtin.file:
+    path: "{{ savegame_backup_dir }}"
+    state: directory
+    owner: root
+    group: "{{ savegame_backup_user }}"
+    mode: '0750'
+
+- name: Deploy the archive script
+  ansible.builtin.template:
+    src: savegame-backup.sh.j2
+    dest: "/usr/local/sbin/savegame-backup-{{ savegame_backup_name }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy the systemd service and timer
+  ansible.builtin.template:
+    src: "savegame-backup.{{ item }}.j2"
+    dest: "/etc/systemd/system/savegame-backup-{{ savegame_backup_name }}.{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - service
+    - timer
+  register: savegame_backup_units
+
+- name: Enable the backup timer
+  ansible.builtin.systemd_service:
+    name: "savegame-backup-{{ savegame_backup_name }}.timer"
+    # Restarted when the units change, so that a new schedule is applied
+    state: "{{ savegame_backup_units.changed | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true

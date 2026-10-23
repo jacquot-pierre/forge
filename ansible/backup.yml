@@ -1,0 +1,29 @@
+---
+# Game save backups: the game VMs archive their saves every 6 hours (role savegame_backup), the main Proxmox
+# server pulls these archives read-only 15 minutes later (role backup_pull). See roles/savegame_backup/README.md.
+# Run the whole playbook: the second play needs the public key read by the first one.
+- name: Prepare the backup host (main Proxmox server)
+  hosts: proxmox
+  gather_facts: false
+  pre_tasks:
+    # Stopped VMs are listed too: their address comes from Cloud-Init, the pull simply skips them while they are off
+    - name: List the game VMs to back up
+      ansible.builtin.set_fact:
+        backup_game_vms: "{{ backup_game_vms | default([]) + [{'name': item, 'host': hostvars[item].ansible_host}] }}"
+      loop: "{{ groups['group_enshrouded'] | default([]) }}"
+  roles:
+    - role: backup_pull
+      vars:
+        backup_pull_sources: "{{ backup_game_vms | default([]) }}"
+
+- name: Archive the Enshrouded saves
+  hosts: group_enshrouded:&proxmox_all_running
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
+  become: true
+  gather_facts: false
+  roles:
+    - role: savegame_backup
+      vars:
+        savegame_backup_name: enshrouded
+        savegame_backup_source: /opt/enshrouded/savegame
+        savegame_backup_authorized_key: "{{ hostvars['proxmox']['backup_pull_public_key'] }}"

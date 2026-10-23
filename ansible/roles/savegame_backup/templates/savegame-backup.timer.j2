@@ -1,0 +1,11 @@
+# Deploy via ansible (role savegame_backup)
+[Unit]
+Description=Archive the {{ savegame_backup_name }} save folder periodically
+
+[Timer]
+OnCalendar={{ savegame_backup_schedule }}
+Persistent=true
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target
