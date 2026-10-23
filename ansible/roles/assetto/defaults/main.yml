@@ -1,0 +1,17 @@
+---
+assetto_dir: /opt/assetto
+# Latest stable release (2023), the one documented on assettoserver.org.
+# Newer versions are only published as pre-releases (0.0.55-preXX)
+assetto_image: compujuckel/assettoserver:0.0.54
+assetto_timezone: Europe/Paris
+
+# Since 0.0.55-pre44 the AssettoServer image no longer ships steamclient.so (required by Steam auth, UseSteamAuth).
+# Set to true for those versions: it is extracted once from assetto_steamcmd_image, like their Dockerfile did before
+# (delete the steam folder in assetto_dir to refresh it)
+assetto_steamclient_from_steamcmd: false
+assetto_steamcmd_image: cm2network/steamcmd:root-trixie
+
+# Game content on the control node, synchronized to the VM (never stored in git: copyrighted Kunos/SRP files).
+# Content Manager > Server > "Pack", extracted there: only content/ (cars/, tracks/ with the AI spline) and system/
+# are sent. The configuration (cfg/, admins.txt...) comes from this role: files/, templates/cfg/server_cfg.ini.j2.
+assetto_content_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/assetto-preset"

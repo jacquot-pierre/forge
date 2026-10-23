@@ -1,0 +1,3 @@
+---
+# SSH user of the VMs on the main Proxmox server (192.168.1.70, node "proxmox")
+ansible_user: root

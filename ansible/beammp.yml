@@ -1,0 +1,10 @@
+---
+# Deploy the BeamMP server (BeamNG.drive multiplayer, freeroam) on the running VM tagged "beammp".
+# AuthKey: inventories/group_vars/group_beammp/vault.yml (see roles/beammp/README.md).
+- name: Deploy BeamMP server
+  hosts: group_beammp:&proxmox_all_running
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
+  become: true
+  gather_facts: false
+  roles:
+    - beammp

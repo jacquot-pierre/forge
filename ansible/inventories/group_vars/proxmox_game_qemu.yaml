@@ -1,0 +1,4 @@
+---
+# SSH user of the VMs on the gaming Proxmox server (192.168.1.125, node "game"),
+# cloud-init "ciuser" of the Debian 13 template
+ansible_user: machiki

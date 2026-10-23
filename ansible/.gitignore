@@ -130,3 +130,10 @@ dmypy.json
 
 # Intellij cache
 .idea
+
+# Assetto Corsa: game content and AI splines never go to git (copyrighted, the repository is public).
+# They live in ~/assetto-preset on the control node, see roles/assetto/README.md
+roles/assetto/files/content/
+roles/assetto/files/system/
+*.aip
+fast_lane.ai

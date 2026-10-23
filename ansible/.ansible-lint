@@ -1,0 +1,6 @@
+---
+# Same profile as the CI/commit convention of this repository
+profile: production
+exclude_paths:
+  # Game server configuration files written by the games themselves (not Ansible content)
+  - roles/assetto/files/

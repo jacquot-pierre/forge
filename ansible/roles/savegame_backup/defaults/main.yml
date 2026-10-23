@@ -1,0 +1,16 @@
+---
+# Periodic archives of a game save folder on the game VM, pulled read-only by the backup host (role backup_pull).
+savegame_backup_name: enshrouded
+savegame_backup_source: /opt/enshrouded/savegame
+savegame_backup_dir: /var/backups/savegames
+
+# systemd OnCalendar: every 6 hours. Persistent: a run missed while the VM was off happens at the next boot
+savegame_backup_schedule: "00/6:00"
+# Archives older than this are deleted, but the most recent savegame_backup_keep_min are always kept
+savegame_backup_keep_days: 7
+savegame_backup_keep_min: 28
+
+# Read-only SSH access for the backup host, restricted to savegame_backup_dir (rrsync -ro)
+savegame_backup_user: savegame-backup
+# Public key of the backup host, set by the backup.yml playbook from the backup_pull role
+# savegame_backup_authorized_key:

@@ -1,0 +1,28 @@
+---
+# Base configuration for VMs cloned from the Debian 13 cloud-init template.
+# Targets every *running* VM tagged "base" in Proxmox, on any of the Proxmox servers.
+# Tip: put the "base" tag on the template itself, every clone will inherit it.
+- name: Base configuration of cloud-init VMs
+  hosts: group_base:&proxmox_all_running
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
+  become: true
+  gather_facts: false
+  pre_tasks:
+    - name: Wait for the VM to be reachable over SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Wait for cloud-init first boot to finish (avoids apt lock conflicts)
+      ansible.builtin.command:
+        cmd: cloud-init status --wait
+      register: base_cloud_init_status
+      changed_when: false
+      # rc 2 = finished with recoverable errors (degraded), still usable
+      failed_when: base_cloud_init_status.rc not in [0, 2]
+
+    - name: Gather facts
+      ansible.builtin.setup:
+
+  roles:
+    - common
+    - base

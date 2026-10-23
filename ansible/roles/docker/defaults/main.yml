@@ -1,0 +1,4 @@
+---
+# Users allowed to run docker without sudo, skipped if they do not exist on the host
+docker_users:
+  - debian

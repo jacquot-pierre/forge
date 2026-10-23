@@ -1,0 +1,16 @@
+---
+# Backup host (main Proxmox server): pulls the archives made on the game VMs (role savegame_backup) over SSH,
+# read-only. Pull rather than push: a game VM exposed to the internet never gets access to the hypervisor.
+backup_pull_dir: /srv/backups/savegames
+backup_pull_key: /root/.ssh/backup_pull_ed25519
+backup_pull_known_hosts: /root/.ssh/backup_pull_known_hosts
+
+# List of {name, host}: host = IP of a game VM running the savegame_backup role (set by the backup.yml playbook)
+backup_pull_sources: []
+# Remote user and options of the savegame_backup role
+backup_pull_remote_user: savegame-backup
+
+# 15 minutes after the archives of the game VMs (every 6 hours)
+backup_pull_schedule: "00/6:15"
+backup_pull_keep_days: 7
+backup_pull_keep_min: 28

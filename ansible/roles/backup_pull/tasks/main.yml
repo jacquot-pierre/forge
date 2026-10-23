@@ -1,0 +1,60 @@
+---
+- name: Install rsync
+  ansible.builtin.apt:
+    name: rsync
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create the SSH key used to pull the archives
+  community.crypto.openssh_keypair:
+    path: "{{ backup_pull_key }}"
+    type: ed25519
+    comment: "backup_pull@{{ inventory_hostname }}"
+    mode: '0600'
+
+# Read by the backup.yml playbook to authorize this key on the game VMs
+- name: Read the public key
+  ansible.builtin.slurp:
+    src: "{{ backup_pull_key }}.pub"
+  register: backup_pull_public_key_file
+
+- name: Expose the public key to the other plays
+  ansible.builtin.set_fact:
+    backup_pull_public_key: "{{ backup_pull_public_key_file.content | b64decode | trim }}"
+
+- name: Create the backup directory
+  ansible.builtin.file:
+    path: "{{ backup_pull_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Deploy the pull script
+  ansible.builtin.template:
+    src: backup-pull.sh.j2
+    dest: /usr/local/sbin/backup-pull
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy the systemd service and timer
+  ansible.builtin.template:
+    src: "backup-pull.{{ item }}.j2"
+    dest: "/etc/systemd/system/backup-pull.{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - service
+    - timer
+  register: backup_pull_units
+
+- name: Enable the pull timer
+  ansible.builtin.systemd_service:
+    name: backup-pull.timer
+    # Restarted when the units change, so that a new schedule is applied
+    state: "{{ backup_pull_units.changed | ternary('restarted', 'started') }}"
+    enabled: true
+    daemon_reload: true

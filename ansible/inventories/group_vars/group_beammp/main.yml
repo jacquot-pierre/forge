@@ -1,0 +1,7 @@
+---
+# BeamMP server settings (defaults and documentation: roles/beammp/defaults/main.yml, roles/beammp/README.md)
+
+# BeamMP account names allowed to join (case insensitive), everyone else and guests are refused
+beammp_whitelist:
+  - BambouJumpOnYou
+  - Mordeci

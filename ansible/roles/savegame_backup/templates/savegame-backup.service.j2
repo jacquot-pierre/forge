@@ -1,0 +1,10 @@
+# Deploy via ansible (role savegame_backup)
+[Unit]
+Description=Archive the {{ savegame_backup_name }} save folder
+
+[Service]
+Type=oneshot
+# Archives are readable by the restricted backup user (group), by nobody else
+Group={{ savegame_backup_user }}
+UMask=0027
+ExecStart=/usr/local/sbin/savegame-backup-{{ savegame_backup_name }}

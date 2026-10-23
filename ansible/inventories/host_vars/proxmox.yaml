@@ -1,0 +1,5 @@
+---
+# Main Proxmox server (node "proxmox", 192.168.1.70), managed over SSH as root for the backup host role
+# (backup.yml). The dynamic inventory does not set its address (want_proxmox_nodes_ansible_host: false).
+ansible_host: 192.168.1.70
+ansible_user: root

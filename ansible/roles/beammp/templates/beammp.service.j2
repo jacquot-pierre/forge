@@ -1,0 +1,27 @@
+# Deploy via ansible
+[Unit]
+Description=BeamMP server (BeamNG.drive multiplayer)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ beammp_user }}
+Group={{ beammp_user }}
+# Server.log and Resources/ live in the working directory
+WorkingDirectory={{ beammp_dir }}/server
+EnvironmentFile={{ beammp_dir }}/beammp.env
+ExecStart={{ beammp_dir }}/bin/BeamMP-Server-{{ beammp_version }}
+# No TTY: the console falls back to reading stdin line by line, and simply stops at end of input
+StandardInput=null
+Restart=on-failure
+RestartSec=10
+
+# Hardening: the server only writes in its working directory
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ beammp_dir }}/server
+
+[Install]
+WantedBy=multi-user.target

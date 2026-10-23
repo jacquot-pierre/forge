@@ -1,0 +1,22 @@
+---
+base_timezone: Europe/Paris
+
+# Run a full upgrade of the system at each playbook run
+base_upgrade: true
+
+base_packages:
+  - qemu-guest-agent
+  - ca-certificates
+  - curl
+  - gpg
+  - vim
+  - htop
+  - unattended-upgrades
+
+# Automatic security updates (no automatic reboot)
+base_unattended_upgrades: true
+
+# SSH hardening: key only authentication, root included (e.g. VS Code Remote-SSH as root)
+# Set base_ssh_permit_root_login to "no" to forbid root login (not on VMs managed as root by ansible)
+base_ssh_password_authentication: "no"
+base_ssh_permit_root_login: prohibit-password

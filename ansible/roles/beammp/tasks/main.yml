@@ -1,0 +1,127 @@
+---
+- name: Check that the AuthKey is defined
+  ansible.builtin.assert:
+    that:
+      - beammp_auth_key is defined
+      - beammp_auth_key | length == 36
+    fail_msg: >-
+      beammp_auth_key (36 characters, from https://keymaster.beammp.com) must be defined
+      in the vault inventories/group_vars/group_beammp/vault.yml (see roles/beammp/README.md)
+    quiet: true
+
+- name: Install runtime dependencies
+  ansible.builtin.apt:
+    name:
+      - liblua5.3-0
+      - rsync
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create beammp system user
+  ansible.builtin.user:
+    name: "{{ beammp_user }}"
+    system: true
+    home: "{{ beammp_dir }}/server"
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Create beammp directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ beammp_dir }}", owner: root, mode: '0755' }
+    - { path: "{{ beammp_dir }}/bin", owner: root, mode: '0755' }
+    - { path: "{{ beammp_dir }}/server", owner: "{{ beammp_user }}", mode: '0750' }
+    - { path: "{{ beammp_dir }}/server/Resources", owner: "{{ beammp_user }}", mode: '0750' }
+    - { path: "{{ beammp_dir }}/server/Resources/Client", owner: "{{ beammp_user }}", mode: '0750' }
+    - { path: "{{ beammp_dir }}/server/Resources/Server", owner: "{{ beammp_user }}", mode: '0750' }
+
+# Versioned file name: changing beammp_version downloads the new binary and updates the unit
+- name: Download BeamMP server {{ beammp_version }}
+  ansible.builtin.get_url:
+    url: "https://github.com/BeamMP/BeamMP-Server/releases/download/{{ beammp_version }}/{{ beammp_asset }}"
+    dest: "{{ beammp_dir }}/bin/BeamMP-Server-{{ beammp_version }}"
+    checksum: "{{ beammp_checksum }}"
+    owner: root
+    group: root
+    mode: '0755'
+  notify: Restart beammp
+
+# Root only: contains the AuthKey, read by systemd before dropping privileges
+- name: Deploy server settings
+  ansible.builtin.template:
+    src: beammp.env.j2
+    dest: "{{ beammp_dir }}/beammp.env"
+    owner: root
+    group: root
+    mode: '0600'
+  diff: false
+  notify: Restart beammp
+
+- name: Check the mods folder on the control node
+  ansible.builtin.stat:
+    path: "{{ beammp_resources_dir }}"
+  register: beammp_resources
+  delegate_to: localhost
+  become: false
+
+# No delete: removing a mod from the control node does not remove it from the server (see README)
+- name: Synchronize mods
+  ansible.posix.synchronize:
+    src: "{{ beammp_resources_dir }}/"
+    dest: "{{ beammp_dir }}/server/Resources/"
+    owner: false
+    group: false
+    delete: false
+  when: beammp_resources.stat.exists
+  notify: Restart beammp
+
+- name: Create whitelist plugin directory
+  ansible.builtin.file:
+    path: "{{ beammp_dir }}/server/Resources/Server/Whitelist"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: beammp_whitelist | length > 0
+
+- name: Deploy whitelist plugin
+  ansible.builtin.template:
+    src: whitelist.lua.j2
+    dest: "{{ beammp_dir }}/server/Resources/Server/Whitelist/main.lua"
+    owner: root
+    group: root
+    mode: '0644'
+  when: beammp_whitelist | length > 0
+  notify: Restart beammp
+
+- name: Remove whitelist plugin (empty whitelist)
+  ansible.builtin.file:
+    path: "{{ beammp_dir }}/server/Resources/Server/Whitelist"
+    state: absent
+  when: beammp_whitelist | length == 0
+  notify: Restart beammp
+
+- name: Deploy systemd unit
+  ansible.builtin.template:
+    src: beammp.service.j2
+    dest: /etc/systemd/system/beammp.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart beammp
+
+- name: Apply pending restarts
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure beammp is running and enabled at boot
+  ansible.builtin.systemd_service:
+    name: beammp
+    state: started
+    enabled: true
+    daemon_reload: true

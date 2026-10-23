@@ -1,0 +1,21 @@
+-- Deploy via ansible (beammp role, variable beammp_whitelist)
+-- Only lets in the listed BeamMP accounts (case insensitive). Guests are always refused: they choose their name.
+local allowed = {
+{% for name in beammp_whitelist %}
+  [{{ name | string | lower | to_json(ensure_ascii=False) }}] = true,
+{% endfor %}
+}
+
+-- Returning a string refuses the player with that message, returning nothing lets them in
+function whitelistOnPlayerAuth(name, role, isGuest, identifiers)
+  if isGuest then
+    print("Whitelist: guest " .. name .. " refused")
+    return {{ beammp_whitelist_guest_message | to_json(ensure_ascii=False) }}
+  end
+  if not allowed[string.lower(name)] then
+    print("Whitelist: " .. name .. " refused")
+    return {{ beammp_whitelist_message | to_json(ensure_ascii=False) }}
+  end
+end
+
+MP.RegisterEvent("onPlayerAuth", "whitelistOnPlayerAuth")

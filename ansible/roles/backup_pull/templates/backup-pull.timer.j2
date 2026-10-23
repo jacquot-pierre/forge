@@ -1,0 +1,10 @@
+# Deploy via ansible (role backup_pull)
+[Unit]
+Description=Pull the game save archives periodically
+
+[Timer]
+OnCalendar={{ backup_pull_schedule }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

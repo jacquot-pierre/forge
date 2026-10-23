@@ -1,0 +1,15 @@
+---
+# Deploy the Assetto Corsa freeroam server (AssettoServer, Docker compose) on the running VM tagged "assetto".
+# Configuration comes from the role (passwords: inventories/group_vars/group_assetto/vault.yml),
+# game content (content/ + system/) from assetto_content_dir on the control node (see roles/assetto/README.md).
+- name: Deploy AssettoServer
+  hosts: group_assetto:&proxmox_all_running
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
+  become: true
+  gather_facts: true
+  vars:
+    docker_users:
+      - "{{ ansible_user }}"
+  roles:
+    - docker
+    - assetto

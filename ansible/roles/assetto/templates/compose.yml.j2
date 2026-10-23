@@ -1,0 +1,22 @@
+# Deploy via ansible
+services:
+  assetto:
+    image: {{ assetto_image }}
+    container_name: assetto
+    restart: unless-stopped
+    # Dedicated VM: the server listens directly on the ports of cfg/server_cfg.ini
+    # (TCP_PORT, UDP_PORT, HTTP_PORT), no port mapping to keep in sync
+    network_mode: host
+    environment:
+      TZ: {{ assetto_timezone }}
+    volumes:
+      - ./data:/data
+{% if assetto_steamclient_from_steamcmd | bool %}
+      # Not shipped by the image anymore, extracted by ansible from the steamcmd image
+      - ./steam/steamclient.so:/root/.steam/sdk64/steamclient.so:ro
+{% endif %}
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

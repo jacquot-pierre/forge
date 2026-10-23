@@ -1,0 +1,14 @@
+---
+# Deploy the Enshrouded dedicated server (Docker compose) on the running VM tagged "enshrouded".
+# Passwords: inventories/group_vars/group_enshrouded/vault.yml (see README).
+- name: Deploy Enshrouded server
+  hosts: group_enshrouded:&proxmox_all_running
+  # SSH user is set per Proxmox server by ansible_user in inventories/group_vars/proxmox_<node>_qemu.yaml
+  become: true
+  gather_facts: true
+  vars:
+    docker_users:
+      - "{{ ansible_user }}"
+  roles:
+    - docker
+    - enshrouded
