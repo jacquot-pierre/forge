@@ -1,0 +1,4 @@
+---
+# Admin public keys, always authorized for root and the SSH user of the VMs (role base)
+base_ssh_authorized_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBCXQtt5HvoNG5UmMn646ANpmXUSGfk7mPYvaOWiLWg guerande@guerande-ROG

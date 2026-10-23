@@ -4,7 +4,8 @@
     upgrade: dist
     update_cache: true
     cache_valid_time: 3600
-  when: base_upgrade
+  # | bool: a value given with -e (e.g. -e base_upgrade=false) is a string, "false" would be true
+  when: base_upgrade | bool
 
 - name: Install base packages
   ansible.builtin.apt:
@@ -27,8 +28,8 @@
   ansible.builtin.copy:
     dest: /etc/apt/apt.conf.d/20auto-upgrades
     content: |
-      APT::Periodic::Update-Package-Lists "{{ base_unattended_upgrades | ternary('1', '0') }}";
-      APT::Periodic::Unattended-Upgrade "{{ base_unattended_upgrades | ternary('1', '0') }}";
+      APT::Periodic::Update-Package-Lists "{{ base_unattended_upgrades | bool | ternary('1', '0') }}";
+      APT::Periodic::Unattended-Upgrade "{{ base_unattended_upgrades | bool | ternary('1', '0') }}";
     owner: root
     group: root
     mode: '0644'
@@ -54,6 +55,21 @@
   when:
     - base_ssh_permit_root_login != 'no'
     - base_root_authorized_keys.stat.exists
+
+- name: Get existing users
+  ansible.builtin.getent:
+    database: passwd
+
+# Keys that must always allow logging in as root and as the SSH user (when it exists): never lose access
+- name: Ensure the admin SSH keys are authorized
+  ansible.posix.authorized_key:
+    user: "{{ item.0 }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ (['root', ansible_user | default('root')] | unique | select('in', ansible_facts['getent_passwd']) | list)
+            | product(base_ssh_authorized_keys) | list }}"
+  loop_control:
+    label: "{{ item.0 }}: {{ item.1.split() | last }}"
 
 # sshd keeps the first value it reads, 10-* is loaded before cloud-init's 50-cloud-init.conf
 - name: Harden SSH configuration

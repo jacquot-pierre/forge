@@ -20,3 +20,7 @@ base_unattended_upgrades: true
 # Set base_ssh_permit_root_login to "no" to forbid root login (not on VMs managed as root by ansible)
 base_ssh_password_authentication: "no"
 base_ssh_permit_root_login: prohibit-password
+
+# Public SSH keys always authorized for root and for the SSH user (ansible_user) when it exists.
+# Set for every host in inventories/group_vars/all/ssh_keys.yaml
+base_ssh_authorized_keys: []
