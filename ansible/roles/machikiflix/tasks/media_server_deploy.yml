@@ -15,6 +15,8 @@
     machikiflix_backup_compose_src: docker-compose-media-server.yml.j2
     machikiflix_backup_compose_dest: "{{ machikiflix_media_server_folder }}/docker-compose.yml"
     machikiflix_backup_config_folder: "{{ machikiflix_media_server_folder }}/config"
+    # Large config (metadata, images): only keep the last backup
+    machikiflix_backup_keep: 1
 
 - name: Create systemd service for media server
   ansible.builtin.template:
