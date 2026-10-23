@@ -1,0 +1,58 @@
+---
+# Back up a stack config folder before its compose file changes (image updates can migrate the data).
+# The service is stopped for a consistent copy; the compose template task then notifies its restart handler.
+- name: Check whether the compose file is deployed for {{ machikiflix_backup_stack }}
+  ansible.builtin.stat:
+    path: "{{ machikiflix_backup_compose_dest }}"
+  register: machikiflix_backup_compose_stat
+
+- name: Check whether the compose file will change for {{ machikiflix_backup_stack }}
+  ansible.builtin.template:
+    src: "{{ machikiflix_backup_compose_src }}"
+    dest: "{{ machikiflix_backup_compose_dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+  check_mode: true
+  register: machikiflix_backup_compose_check
+  when: machikiflix_backup_compose_stat.stat.exists
+
+# Not a handler: the backup must run before the compose file is replaced
+- name: Back up the config of {{ machikiflix_backup_stack }}
+  when: machikiflix_backup_compose_check is changed  # noqa: no-handler
+  block:
+    - name: Stop the service of {{ machikiflix_backup_stack }}
+      ansible.builtin.systemd:
+        name: "{{ machikiflix_backup_service }}"
+        state: stopped
+
+    - name: Ensure the backup folder exists
+      ansible.builtin.file:
+        path: "{{ machikiflix_backup_folder }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Archive the config of {{ machikiflix_backup_stack }}
+      community.general.archive:
+        path: "{{ machikiflix_backup_config_folder }}"
+        dest: "{{ machikiflix_backup_folder }}/{{ machikiflix_backup_stack }}-{{ ansible_facts['date_time']['iso8601_basic_short'] }}.tar.gz"
+        format: gz
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Find the config backups of {{ machikiflix_backup_stack }}
+      ansible.builtin.find:
+        paths: "{{ machikiflix_backup_folder }}"
+        patterns: "{{ machikiflix_backup_stack }}-*.tar.gz"
+      register: machikiflix_backup_archives
+
+    - name: Remove the oldest config backups of {{ machikiflix_backup_stack }}
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ (machikiflix_backup_archives.files | sort(attribute='mtime'))[:-machikiflix_backup_keep] }}"
+      loop_control:
+        label: "{{ item.path }}"

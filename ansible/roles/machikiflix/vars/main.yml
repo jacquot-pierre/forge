@@ -6,3 +6,6 @@ machikiflix_arr_folder: /opt/arr
 machikiflix_pinchflat_folder: /opt/pinchflat
 machikiflix_gluetun_folder: /opt/gluetun
 machikiflix_data: /data
+machikiflix_backup_folder: /opt/backups
+# Number of config backups kept per stack
+machikiflix_backup_keep: 3

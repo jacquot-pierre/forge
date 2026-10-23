@@ -6,6 +6,16 @@
     group: root
     mode: '0755'
 
+- name: Back up the media-server config before a compose change
+  ansible.builtin.include_tasks:
+    file: roles/machikiflix/tasks/backup_config.yml
+  vars:
+    machikiflix_backup_stack: media-server
+    machikiflix_backup_service: media-server.service
+    machikiflix_backup_compose_src: docker-compose-media-server.yml.j2
+    machikiflix_backup_compose_dest: "{{ machikiflix_media_server_folder }}/docker-compose.yml"
+    machikiflix_backup_config_folder: "{{ machikiflix_media_server_folder }}/config"
+
 - name: Create systemd service for media server
   ansible.builtin.template:
     src: "{{ item.src }}"
