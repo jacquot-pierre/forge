@@ -6,3 +6,15 @@ beammp_whitelist:
   - BambouJumpOnYou
   - Mordeci
   - ALostKoala
+
+# Map loaded by the server: /levels/<map>/info.json, <map> being the folder name under levels/ (case sensitive).
+# Change it, then run: poetry run ansible-playbook beammp.yml
+#
+# Stock maps (shipped with the game):
+#   west_coast_usa, east_coast_usa, italy, utah, jungle_rock_island, johnson_valley, small_island,
+#   industrial, hirochi_raceway, automation_test_track, driver_training, derby, gridmap_v2, smallgrid
+# Modded maps (zips in ~/beammp-resources/Client, sent to the players when they join):
+#   Gheo_Nordschleife_2026 (Gheo_Nordschleife_2026.zip): Nürburgring Nordschleife + GP-Strecke
+#   mount_coottha, mount_coottha_wet (mount_coottha.zip): Mount Coot-tha, dry and wet versions
+#   nefr (nefr.zip)
+beammp_map: /levels/Gheo_Nordschleife_2026/info.json
