@@ -1,0 +1,13 @@
+---
+# Discord power bot settings (defaults and documentation: roles/power_bot/defaults/main.yml, roles/power_bot/README.md)
+# Secrets (Discord token, Proxmox token secret) go in the vault next to this file: vault.yml
+
+# Network card nic0 of the gaming Proxmox server (Wake-on-LAN tested from the main Proxmox server)
+power_bot_wol_mac: "30:56:0f:86:0a:3b"
+
+# Discord IDs (developer mode: right click > Copy ID), to fill in
+# power_bot_discord_guild_id: 123456789012345678
+# power_bot_discord_player_role_ids:
+#   - 234567890123456789   # "Joueurs" role
+# power_bot_discord_admin_user_ids:
+#   - 345678901234567890   # Mordeci
