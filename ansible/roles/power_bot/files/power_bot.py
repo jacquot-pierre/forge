@@ -195,6 +195,7 @@ class PowerBot(discord.Client):
         guild = discord.Object(id=self.config.guild_id)
         self.tree.add_command(build_server_group(self), guild=guild)
         self.tree.add_command(build_game_group(self), guild=guild)
+        self.tree.add_command(build_help_command(self), guild=guild)
         # Guild commands only: invisible and unusable from any other Discord server
         await self.tree.sync(guild=guild)
         log.info("Commands synchronized on guild %s", self.config.guild_id)
@@ -248,6 +249,42 @@ class PowerBot(discord.Client):
                 if await self.proxmox.is_up():
                     return True
             return False
+
+
+def help_text(config: Config) -> str:
+    """Help shown by /help, built from the configuration (games, dedicated channels)."""
+    games = ", ".join(f"`{game}`" for game in config.games)
+    where = (", ici, dans " + ", ".join(f"<#{channel_id}>" for channel_id in sorted(config.channel_ids))
+             if config.channel_ids else "")
+    return "\n".join([
+        "**🎮 PowerBot : allumer le serveur de jeu**",
+        "",
+        f"Le serveur de jeu est éteint la plupart du temps. Ce bot permet de l'allumer et de lancer un jeu{where}.",
+        "",
+        "**Commandes**",
+        "• `/serveur statut` : le serveur est-il allumé, quels jeux tournent",
+        "• `/serveur allumer` : réveille le serveur (1 à 2 min)",
+        f"• `/jeu demarrer` + choix du jeu ({games}) : démarre le jeu et allume le serveur si besoin. "
+        "Compte quelques minutes de plus avant de pouvoir te connecter",
+        "• `/jeu arreter` + choix du jeu : arrête le jeu proprement, monde sauvegardé",
+        "• `/serveur eteindre` : éteint tout (réservé aux admins)",
+        "• `/help` : cette aide",
+        "",
+        "**Bonnes pratiques**",
+        "• Arrête le jeu avec `/jeu arreter` quand vous avez fini de jouer",
+        "• Si le bot répond que le serveur ne répond pas, préviens un admin",
+    ])
+
+
+def build_help_command(bot: PowerBot) -> app_commands.Command:
+    @app_commands.command(name="help", description="Comment utiliser le bot du serveur de jeu")
+    async def help_command(interaction: discord.Interaction) -> None:
+        if not await bot.authorize(interaction):
+            return
+        # Only visible to the person asking
+        await interaction.response.send_message(help_text(bot.config), ephemeral=True)
+
+    return help_command
 
 
 def state_label(vm: dict) -> str:

@@ -10,6 +10,7 @@ Un bot Discord ([files/power_bot.py](files/power_bot.py)) qui permet à tes amis
 | `/jeu demarrer <jeu>` | Joueurs | Démarre la VM du jeu, en réveillant le serveur si besoin |
 | `/jeu arreter <jeu>` | Joueurs | Arrête proprement la VM du jeu |
 | `/serveur eteindre` | Admins seulement | Arrête le serveur (Proxmox arrête d'abord les VMs proprement) |
+| `/help` | Joueurs | Affiche l'aide, visible seulement par celui qui la demande |
 
 ```
 Discord ◄──── connexion sortante ──── LXC power-bot (Proxmox principal, 192.168.1.70)

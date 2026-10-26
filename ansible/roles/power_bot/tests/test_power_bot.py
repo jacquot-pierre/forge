@@ -172,7 +172,16 @@ class CommandsTest(unittest.TestCase):
         self.assertEqual(sorted(c.name for c in game.commands), ["arreter", "demarrer"])
         start = next(c for c in game.commands if c.name == "demarrer")
         self.assertEqual([choice.value for choice in start.parameters[0].choices], ["enshrouded", "assetto", "beammp"])
+        self.assertEqual(power_bot.build_help_command(bot).name, "help")
         asyncio.run(bot.close())
+
+    def test_help_text(self):
+        text = power_bot.help_text(power_bot.Config.from_env(dict(ENV, DISCORD_CHANNEL_IDS="5000")))
+        for expected in ("/serveur statut", "/serveur allumer", "/serveur eteindre", "/jeu demarrer", "/jeu arreter",
+                         "`enshrouded`, `assetto`, `beammp`", "<#5000>"):
+            self.assertIn(expected, text)
+        self.assertLessEqual(len(text), 2000)  # Discord message limit
+        self.assertNotIn("<#", power_bot.help_text(power_bot.Config.from_env(ENV)))
 
 
 if __name__ == "__main__":
