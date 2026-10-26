@@ -13,7 +13,7 @@ power_bot_discord_admin_user_ids: []
 # Gaming Proxmox server, API token limited to power management (see README)
 power_bot_proxmox_url: https://192.168.1.125:8006
 power_bot_proxmox_node: game
-power_bot_proxmox_token_id: powerbot@pve!bot
+power_bot_proxmox_token_id: powerbot@pve!powerbot
 # Self-signed certificate of the Proxmox server on the LAN
 power_bot_proxmox_verify_tls: false
 

@@ -5,6 +5,9 @@
 # Network card nic0 of the gaming Proxmox server (Wake-on-LAN tested from the main Proxmox server)
 power_bot_wol_mac: "30:56:0f:86:0a:3b"
 
+# Proxmox API token of the gaming server (PowerBot role: Sys.Audit, Sys.PowerMgmt, VM.Audit, VM.PowerMgmt)
+power_bot_proxmox_token_id: powerbot@pve!powerbot
+
 # Discord IDs (developer mode: right click > Copy ID), to fill in
 # power_bot_discord_guild_id: 123456789012345678
 # power_bot_discord_player_role_ids:

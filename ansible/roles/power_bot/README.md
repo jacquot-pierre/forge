@@ -72,9 +72,9 @@ pveum user add powerbot@pve --comment "Discord power bot"
 pveum acl modify / --users powerbot@pve --roles PowerBot
 ```
 ```bash
-pveum user token add powerbot@pve bot --privsep 0
+pveum user token add powerbot@pve powerbot --privsep 0
 ```
-Copier le secret affiché (une seule fois). L'identifiant du token est `powerbot@pve!bot`.
+Copier le secret affiché (une seule fois). L'identifiant du token est `powerbot@pve!powerbot` (variable `power_bot_proxmox_token_id`).
 
 ## 4. Créer le conteneur LXC (Proxmox principal)
 
