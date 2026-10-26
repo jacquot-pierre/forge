@@ -17,3 +17,6 @@ power_bot_discord_player_role_ids:
 # Can also shut the server down
 power_bot_discord_admin_user_ids:
   - 239498605302513664   # Mordeci
+# The commands only work in this text channel
+power_bot_discord_channel_ids:
+  - 1564203343621136435
