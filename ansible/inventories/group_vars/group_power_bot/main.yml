@@ -8,9 +8,12 @@ power_bot_wol_mac: "30:56:0f:86:0a:3b"
 # Proxmox API token of the gaming server (PowerBot role: Sys.Audit, Sys.PowerMgmt, VM.Audit, VM.PowerMgmt)
 power_bot_proxmox_token_id: powerbot@pve!powerbot
 
-# Discord IDs (developer mode: right click > Copy ID), to fill in
-# power_bot_discord_guild_id: 123456789012345678
-# power_bot_discord_player_role_ids:
-#   - 234567890123456789   # "Joueurs" role
-# power_bot_discord_admin_user_ids:
-#   - 345678901234567890   # Mordeci
+# Discord IDs (developer mode: right click > Copy ID)
+# Discord server where the commands exist ("Les petits pangolins")
+power_bot_discord_guild_id: 335709118528487428
+# Can wake the server up, see its status, start and stop the games
+power_bot_discord_player_role_ids:
+  - 1564200026580717580   # "Pangolin Technique" role
+# Can also shut the server down
+power_bot_discord_admin_user_ids:
+  - 239498605302513664   # Mordeci
