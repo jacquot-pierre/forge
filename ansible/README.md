@@ -134,6 +134,14 @@ VM taguée `beammp` (+ `base`). Binaire officiel BeamMP-Server installé comme s
 poetry run ansible-playbook beammp.yml
 ```
 
+# Bot Discord : allumer / éteindre le serveur gaming
+Bot Discord (conteneur LXC tagué `power_bot` sur le Proxmox principal) : Wake-on-LAN du serveur gaming, démarrage et
+arrêt des jeux via l'API Proxmox. Mise en place (Discord, Wake-on-LAN, token Proxmox, LXC) :
+[roles/power_bot/README.md](roles/power_bot/README.md).
+```bash
+poetry run ansible-playbook power_bot.yml
+```
+
 # Edit a secret vault
 ```bash
 poetry run ansible-vault edit inventories/group_vars/all/proxmox.yaml

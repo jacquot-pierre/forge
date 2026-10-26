@@ -1,0 +1,23 @@
+# Deploy via ansible (role power_bot)
+[Unit]
+Description=Discord bot powering the gaming server on and off
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ power_bot_user }}
+Group={{ power_bot_user }}
+EnvironmentFile=/etc/power-bot/power-bot.env
+ExecStart={{ power_bot_dir }}/venv/bin/python {{ power_bot_dir }}/power_bot.py
+Restart=always
+RestartSec=10
+
+# Hardening: the bot only needs the network
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+
+[Install]
+WantedBy=multi-user.target
