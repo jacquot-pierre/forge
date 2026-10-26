@@ -11,6 +11,16 @@
     group: root
     mode: '0755'
 
+- name: Back up the torrent config before a compose change
+  ansible.builtin.include_tasks:
+    file: roles/machikiflix/tasks/backup_config.yml
+  vars:
+    machikiflix_backup_stack: torrent
+    machikiflix_backup_service: torrent.service
+    machikiflix_backup_compose_src: docker-compose-torrent.yml.j2
+    machikiflix_backup_compose_dest: "{{ machikiflix_torrent_folder }}/docker-compose.yml"
+    machikiflix_backup_config_folder: "{{ machikiflix_torrent_folder }}/config"
+
 - name: Create systemd service for torrent
   ansible.builtin.template:
     src: "{{ item.src }}"
