@@ -171,7 +171,11 @@ class Proxmox:
 
 class PowerBot(discord.Client):
     def __init__(self, config: Config) -> None:
-        super().__init__(intents=discord.Intents.none())
+        # Only the (non privileged) guilds intent, needed by discord.py to track its state: no message content,
+        # no member list, no presence
+        intents = discord.Intents.none()
+        intents.guilds = True
+        super().__init__(intents=intents)
         self.config = config
         self.tree = app_commands.CommandTree(self)
         self.session: aiohttp.ClientSession | None = None
