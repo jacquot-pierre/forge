@@ -1,7 +1,7 @@
 #!/bin/sh
 # Deploy via ansible (role backup_pull)
-# Copies the archives of each game VM, then prunes them like on the VM: older than {{ backup_pull_keep_days }} days
-# deleted, the {{ backup_pull_keep_min }} most recent always kept. A stopped VM is not an error: its turn is skipped.
+# Copies the archives of each game VM, then keeps only the {{ backup_pull_keep }} most recent ones, like on the VM.
+# A stopped VM is not an error: its turn is skipped.
 set -u
 
 ssh_cmd="ssh -i {{ backup_pull_key }} -o UserKnownHostsFile={{ backup_pull_known_hosts }} -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=10"
@@ -14,8 +14,8 @@ if rsync -a --no-owner --no-group -e "$ssh_cmd" "{{ backup_pull_remote_user }}@{
 else
   echo "{{ source.name }}: {{ source.host }} unreachable (VM stopped?), skipped"
 fi
-ls -1t "$dest"/*.tar.gz 2>/dev/null | tail -n +{{ backup_pull_keep_min | int + 1 }} | while read -r old; do
-  find "$old" -mtime +{{ backup_pull_keep_days | int - 1 }} -print -delete
+ls -1t "$dest"/*.tar.gz 2>/dev/null | tail -n +{{ backup_pull_keep | int + 1 }} | while read -r old; do
+  rm -v -- "$old"
 done
 
 {% endfor %}

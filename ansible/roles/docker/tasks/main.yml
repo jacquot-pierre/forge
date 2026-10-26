@@ -33,6 +33,26 @@
     state: present
     update_cache: true
 
+- name: Create the docker service override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Give the Docker service more time to stop
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/docker.service.d/10-forge-stop-timeout.conf
+    content: |
+      # Deploy via ansible (role docker)
+      [Service]
+      TimeoutStopSec={{ docker_systemd_stop_timeout }}
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd
+
 - name: Ensure docker is running and enabled at boot
   ansible.builtin.systemd_service:
     name: docker

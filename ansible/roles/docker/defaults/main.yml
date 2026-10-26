@@ -2,3 +2,7 @@
 # Users allowed to run docker without sudo, skipped if they do not exist on the host
 docker_users:
   - debian
+
+# Time systemd gives the Docker service to stop (default 90s): longer than the stop_grace_period of the
+# containers, so that a game server stopped with its VM has time to save its world before being killed
+docker_systemd_stop_timeout: 5min
