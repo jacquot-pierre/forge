@@ -71,6 +71,7 @@ class Config:
     guild_id: int
     player_role_ids: frozenset[int]
     admin_user_ids: frozenset[int]
+    channel_ids: frozenset[int]
     proxmox_url: str
     proxmox_node: str
     proxmox_token_id: str
@@ -96,6 +97,7 @@ class Config:
             guild_id=int(env["DISCORD_GUILD_ID"]),
             player_role_ids=parse_ids(env.get("DISCORD_PLAYER_ROLE_IDS", "")),
             admin_user_ids=parse_ids(env.get("DISCORD_ADMIN_USER_IDS", "")),
+            channel_ids=parse_ids(env.get("DISCORD_CHANNEL_IDS", "")),
             proxmox_url=env["PROXMOX_URL"].rstrip("/"),
             proxmox_node=env.get("PROXMOX_NODE", "game"),
             proxmox_token_id=env["PROXMOX_TOKEN_ID"],
@@ -120,6 +122,10 @@ class Config:
     def can_admin(self, guild_id: int | None, user_id: int) -> bool:
         """Shut the whole server down."""
         return guild_id == self.guild_id and user_id in self.admin_user_ids
+
+    def in_allowed_channel(self, channel_id: int | None) -> bool:
+        """Commands only work in the dedicated channels (anywhere when none is configured)."""
+        return not self.channel_ids or channel_id in self.channel_ids
 
 
 # --- Side effects ------------------------------------------------------------------------------------------------
@@ -215,11 +221,17 @@ class PowerBot(discord.Client):
             if admin
             else self.config.can_play(interaction.guild_id, user.id, role_ids)
         )
-        log.info("%s (%s) /%s -> %s", user, user.id, interaction.command.qualified_name if interaction.command else "?",
-                 "allowed" if allowed else "denied")
+        in_channel = self.config.in_allowed_channel(interaction.channel_id)
+        log.info("%s (%s) /%s in channel %s -> %s", user, user.id,
+                 interaction.command.qualified_name if interaction.command else "?", interaction.channel_id,
+                 "allowed" if allowed and in_channel else "denied" if not allowed else "wrong channel")
         if not allowed:
             await interaction.response.send_message("⛔ Tu n'as pas le droit d'utiliser cette commande.", ephemeral=True)
-        return allowed
+        elif not in_channel:
+            channels = ", ".join(f"<#{channel_id}>" for channel_id in sorted(self.config.channel_ids))
+            await interaction.response.send_message(f"📍 Les commandes du bot s'utilisent dans {channels}.",
+                                                    ephemeral=True)
+        return allowed and in_channel
 
     async def ensure_up(self, interaction: discord.Interaction) -> bool:
         """Wake the server up if needed and wait until its API answers."""

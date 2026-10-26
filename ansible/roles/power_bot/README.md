@@ -118,10 +118,23 @@ Démarrer le conteneur, puis accepter son empreinte SSH une fois : `ssh root@<ip
 4. **Vérifier**, sur le conteneur : `journalctl -u power-bot -f` doit afficher « Commands synchronized on guild ... ».
    Les commandes apparaissent dans Discord en tapant `/`.
 
-## 6. Réglages
+## 6. Réserver les commandes à un salon
+
+Pour que le bot ne réponde que dans un salon dédié (par exemple `#serveur-de-jeu`) : clic droit sur le salon →
+**Copier l'identifiant du salon**, puis dans `inventories/group_vars/group_power_bot/main.yml` :
+```yaml
+power_bot_discord_channel_ids:
+  - 456789012345678901   # #serveur-de-jeu
+```
+et redéployer. Une commande lancée ailleurs est refusée avec un message (visible seulement par son auteur) qui
+indique le bon salon. En complément, pour que les commandes n'apparaissent **que** dans ce salon : *Paramètres du
+serveur* → **Intégrations** → **PowerBot** → choisir les salons autorisés pour chaque commande.
+
+## 7. Réglages
 
 | Variable | Défaut | Rôle |
 |---|---|---|
+| `power_bot_discord_channel_ids` | `[]` (tous les salons) | Salons où les commandes sont acceptées |
 | `power_bot_games` | `enshrouded`, `assetto`, `beammp` | Jeux proposés = tags Proxmox des VMs |
 | `power_bot_boot_timeout` | `300` | Secondes d'attente du démarrage après un Wake-on-LAN |
 | `power_bot_wol_broadcast` | `192.168.1.255` | Adresse de broadcast du réseau local |
@@ -130,7 +143,7 @@ Démarrer le conteneur, puis accepter son empreinte SSH une fois : `ssh root@<ip
 
 Pour ajouter un jeu : mettre un tag à sa VM dans Proxmox, l'ajouter à `power_bot_games`, redéployer.
 
-## 7. Développement
+## 8. Développement
 
 Tests unitaires (sans Discord ni Proxmox, avec un faux serveur Proxmox local), depuis WSL :
 ```bash

@@ -55,6 +55,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(config.guild_id, 1000)
         self.assertEqual(config.player_role_ids, {2000, 2001})
         self.assertEqual(config.admin_user_ids, {3000})
+        self.assertEqual(config.channel_ids, frozenset())
         self.assertEqual(config.proxmox_url, "https://192.168.1.125:8006")
         self.assertEqual(config.proxmox_node, "game")
         self.assertFalse(config.proxmox_verify_tls)
@@ -84,6 +85,15 @@ class ConfigTest(unittest.TestCase):
         self.assertTrue(config.can_admin(1000, 3000))
         self.assertFalse(config.can_admin(1000, 42))
         self.assertFalse(config.can_admin(1001, 3000))
+
+    def test_channels(self):
+        anywhere = power_bot.Config.from_env(ENV)
+        self.assertTrue(anywhere.in_allowed_channel(5000))
+        self.assertTrue(anywhere.in_allowed_channel(None))
+        dedicated = power_bot.Config.from_env(dict(ENV, DISCORD_CHANNEL_IDS="5000,5001"))
+        self.assertTrue(dedicated.in_allowed_channel(5001))
+        self.assertFalse(dedicated.in_allowed_channel(6000))
+        self.assertFalse(dedicated.in_allowed_channel(None))
 
 
 class FindGameVmsTest(unittest.TestCase):

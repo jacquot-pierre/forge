@@ -9,6 +9,8 @@ power_bot_user: power-bot
 power_bot_discord_guild_id: ""
 power_bot_discord_player_role_ids: []
 power_bot_discord_admin_user_ids: []
+# Text channels where the commands can be used (empty: any channel of the server)
+power_bot_discord_channel_ids: []
 
 # Gaming Proxmox server, API token limited to power management (see README)
 power_bot_proxmox_url: https://192.168.1.125:8006
