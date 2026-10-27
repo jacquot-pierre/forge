@@ -1,0 +1,94 @@
+---
+- name: Check the bot configuration
+  ansible.builtin.assert:
+    that:
+      - power_bot_discord_token is defined
+      - power_bot_proxmox_token_secret is defined
+      - power_bot_discord_guild_id | string | length > 0
+      - power_bot_discord_player_role_ids | length > 0 or power_bot_discord_admin_user_ids | length > 0
+      - power_bot_wol_mac is match('^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$')
+    fail_msg: >-
+      Set power_bot_discord_token and power_bot_proxmox_token_secret in the vault
+      inventories/group_vars/group_power_bot/vault.yml, and power_bot_discord_guild_id, the allowed roles/users
+      and power_bot_wol_mac in inventories/group_vars/group_power_bot/main.yml (see roles/power_bot/README.md)
+    quiet: true
+
+- name: Install Python
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-venv
+      # Needed by the ansible.builtin.pip module itself
+      - python3-packaging
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create the bot system user
+  ansible.builtin.user:
+    name: "{{ power_bot_user }}"
+    system: true
+    home: "{{ power_bot_dir }}"
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Create the bot directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ power_bot_dir }}", mode: '0755' }
+    - { path: /etc/power-bot, mode: '0700' }
+
+- name: Deploy the bot code
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ power_bot_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - power_bot.py
+    - requirements.txt
+  notify: Restart power-bot
+
+# Owned by root: the bot user can run the code but not modify it
+- name: Install the Python dependencies
+  ansible.builtin.pip:
+    requirements: "{{ power_bot_dir }}/requirements.txt"
+    virtualenv: "{{ power_bot_dir }}/venv"
+    virtualenv_command: python3 -m venv
+  notify: Restart power-bot
+
+# Root only (0600), read by systemd before dropping privileges
+- name: Deploy the bot settings
+  ansible.builtin.template:
+    src: power-bot.env.j2
+    dest: /etc/power-bot/power-bot.env
+    owner: root
+    group: root
+    mode: '0600'
+  diff: false
+  notify: Restart power-bot
+
+- name: Deploy the systemd unit
+  ansible.builtin.template:
+    src: power-bot.service.j2
+    dest: /etc/systemd/system/power-bot.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart power-bot
+
+- name: Apply pending restarts
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure the bot is running and enabled at boot
+  ansible.builtin.systemd_service:
+    name: power-bot
+    state: started
+    enabled: true
+    daemon_reload: true

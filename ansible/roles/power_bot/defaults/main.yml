@@ -1,0 +1,35 @@
+---
+# Discord bot powering the gaming Proxmox server on/off (files/power_bot.py), run as a systemd service.
+# It must live on the same LAN as the gaming server: Wake-on-LAN packets do not cross routers.
+power_bot_dir: /opt/power-bot
+power_bot_user: power-bot
+
+# Discord: server (guild) where the commands exist, roles allowed to play, users allowed to shut down
+# (Discord developer mode: right click > Copy ID)
+power_bot_discord_guild_id: ""
+power_bot_discord_player_role_ids: []
+power_bot_discord_admin_user_ids: []
+# Text channels where the commands can be used (empty: any channel of the server)
+power_bot_discord_channel_ids: []
+
+# Gaming Proxmox server, API token limited to power management (see README)
+power_bot_proxmox_url: https://192.168.1.125:8006
+power_bot_proxmox_node: game
+power_bot_proxmox_token_id: powerbot@pve!powerbot
+# Self-signed certificate of the Proxmox server on the LAN
+power_bot_proxmox_verify_tls: false
+
+# Network card of the gaming server (Proxmox > game > System > Network), broadcast address of the LAN
+power_bot_wol_mac: ""
+power_bot_wol_broadcast: 192.168.1.255
+
+# Game VMs, found by their Proxmox tag (one tag per game)
+power_bot_games:
+  - enshrouded
+  - assetto
+  - beammp
+# Seconds to wait for the server to boot after a Wake-on-LAN
+power_bot_boot_timeout: 300
+
+# Secrets, in the vault inventories/group_vars/group_power_bot/vault.yml:
+#   power_bot_discord_token, power_bot_proxmox_token_secret

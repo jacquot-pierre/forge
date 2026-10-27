@@ -1,0 +1,10 @@
+---
+# Deploy the Discord bot that wakes up / shuts down the gaming Proxmox server (role power_bot).
+# Target: the running LXC tagged "power_bot" on the main Proxmox server, managed as root.
+# Settings and secrets: inventories/group_vars/group_power_bot/ (see roles/power_bot/README.md).
+- name: Deploy the Discord power bot
+  hosts: group_power_bot:&proxmox_all_running
+  remote_user: root
+  gather_facts: false
+  roles:
+    - power_bot

@@ -1,0 +1,22 @@
+---
+# Discord power bot settings (defaults and documentation: roles/power_bot/defaults/main.yml, roles/power_bot/README.md)
+# Secrets (Discord token, Proxmox token secret) go in the vault next to this file: vault.yml
+
+# Network card nic0 of the gaming Proxmox server (Wake-on-LAN tested from the main Proxmox server)
+power_bot_wol_mac: "30:56:0f:86:0a:3b"
+
+# Proxmox API token of the gaming server (PowerBot role: Sys.Audit, Sys.PowerMgmt, VM.Audit, VM.PowerMgmt)
+power_bot_proxmox_token_id: powerbot@pve!powerbot
+
+# Discord IDs (developer mode: right click > Copy ID)
+# Discord server where the commands exist ("Les petits pangolins")
+power_bot_discord_guild_id: 335709118528487428
+# Can wake the server up, see its status, start and stop the games
+power_bot_discord_player_role_ids:
+  - 1564200026580717580   # "Pangolin Technique" role
+# Can also shut the server down
+power_bot_discord_admin_user_ids:
+  - 239498605302513664   # Mordeci
+# The commands only work in this text channel
+power_bot_discord_channel_ids:
+  - 1564203343621136435
