@@ -1,7 +1,6 @@
 #!/bin/sh
 # Deploy via ansible (role savegame_backup)
-# Archives {{ savegame_backup_source }} then prunes: archives older than {{ savegame_backup_keep_days }} days are
-# deleted, except the {{ savegame_backup_keep_min }} most recent ones (the VM is often off for days).
+# Archives {{ savegame_backup_source }} then keeps only the {{ savegame_backup_keep }} most recent archives.
 set -eu
 
 dest="{{ savegame_backup_dir }}"
@@ -11,6 +10,6 @@ tar -C "{{ savegame_backup_source | dirname }}" -czf "$archive.tmp" "{{ savegame
 mv "$archive.tmp" "$archive"
 echo "Created $archive ($(du -h "$archive" | cut -f1))"
 
-ls -1t "$dest"/{{ savegame_backup_name }}-*.tar.gz | tail -n +{{ savegame_backup_keep_min | int + 1 }} | while read -r old; do
-  find "$old" -mtime +{{ savegame_backup_keep_days | int - 1 }} -print -delete
+ls -1t "$dest"/{{ savegame_backup_name }}-*.tar.gz | tail -n +{{ savegame_backup_keep | int + 1 }} | while read -r old; do
+  rm -v -- "$old"
 done

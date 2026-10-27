@@ -14,7 +14,7 @@ services:
       - ./enshrouded_server.json:/home/steam/enshrouded/enshrouded_server.json
       - ./savegame:/home/steam/enshrouded/savegame
     # The entrypoint forwards SIGTERM to the server, give it time to save the world
-    stop_grace_period: 2m
+    stop_grace_period: 3m
     logging:
       driver: json-file
       options:

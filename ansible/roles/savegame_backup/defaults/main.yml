@@ -4,11 +4,11 @@ savegame_backup_name: enshrouded
 savegame_backup_source: /opt/enshrouded/savegame
 savegame_backup_dir: /var/backups/savegames
 
-# systemd OnCalendar: every 6 hours. Persistent: a run missed while the VM was off happens at the next boot
-savegame_backup_schedule: "00/6:00"
-# Archives older than this are deleted, but the most recent savegame_backup_keep_min are always kept
-savegame_backup_keep_days: 7
-savegame_backup_keep_min: 28
+# systemd OnCalendar: every hour. Persistent: a run missed while the VM was off happens at the next boot
+savegame_backup_schedule: "*:00"
+# Only the most recent archives are kept, whatever their age (the VM is often off for days):
+# 48 hourly archives = 2 days of play
+savegame_backup_keep: 48
 
 # Read-only SSH access for the backup host, restricted to savegame_backup_dir (rrsync -ro)
 savegame_backup_user: savegame-backup

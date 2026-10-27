@@ -4,17 +4,20 @@ Deux rôles, lancés ensemble par le playbook `backup.yml` :
 
 | Rôle | Où | Ce qu'il fait |
 |---|---|---|
-| `savegame_backup` | VM Enshrouded | Toutes les **6 h** (0h, 6h, 12h, 18h), archive `/opt/enshrouded/savegame` dans `/var/backups/savegames/enshrouded-AAAAMMJJ-HHMM.tar.gz` |
-| `backup_pull` | Proxmox principal (192.168.1.70) | 15 min plus tard, **récupère** les archives dans `/srv/backups/savegames/enshrouded/` |
+| `savegame_backup` | VM Enshrouded | **Toutes les heures** (à l'heure pile), archive `/opt/enshrouded/savegame` dans `/var/backups/savegames/enshrouded-AAAAMMJJ-HHMM.tar.gz` |
+| `backup_pull` | Proxmox principal (192.168.1.70) | Toutes les heures, 15 min après, **récupère** les archives dans `/srv/backups/savegames/enshrouded/` |
 
-Rétention, des deux côtés : les archives de plus de **7 jours** sont supprimées, mais les **28 plus récentes** sont
-toujours gardées (7 jours × 4 par jour). Comme la VM est souvent éteinte plusieurs jours, ça évite de tout perdre
-au retour : sans nouvelle archive, rien n'est supprimé.
+Rétention, des deux côtés : seules les **48 archives les plus récentes** sont gardées, quel que soit leur âge,
+soit 2 jours de jeu en continu. Comme la VM est souvent éteinte plusieurs jours, aucune archive ne disparaît
+pendant qu'elle est éteinte : les plus anciennes ne sont supprimées que lorsqu'une nouvelle arrive.
+
+Ne pas confondre avec la **sauvegarde du monde** par Enshrouded lui-même (pendant la partie et à l'arrêt du serveur,
+qui a 3 minutes pour la terminer, voir `stop_grace_period`) : les archives ci-dessus en sont des copies datées.
 
 ```
 VM enshrouded (192.168.1.210)                         Proxmox principal (192.168.1.70)
 /opt/enshrouded/savegame                              /srv/backups/savegames/enshrouded/
-   │ timer toutes les 6 h (tar.gz)                       ▲
+   │ timer toutes les heures (tar.gz)                    ▲
    ▼                                                     │ timer +15 min : rsync en lecture seule
 /var/backups/savegames/ ──── utilisateur savegame-backup ┘ (clé SSH du Proxmox, limitée à ce dossier)
 ```
@@ -95,9 +98,8 @@ Une fois le monde vérifié en jeu : `sudo rm -rf /opt/enshrouded/savegame.avant
 
 | Variable | Défaut | Rôle |
 |---|---|---|
-| `savegame_backup_schedule` / `backup_pull_schedule` | `00/6:00` / `00/6:15` | Fréquence (format systemd `OnCalendar`) |
-| `savegame_backup_keep_days` / `backup_pull_keep_days` | `7` | Âge maximal des archives |
-| `savegame_backup_keep_min` / `backup_pull_keep_min` | `28` | Nombre d'archives toujours gardées |
+| `savegame_backup_schedule` / `backup_pull_schedule` | `*:00` / `*:15` | Fréquence (format systemd `OnCalendar`) |
+| `savegame_backup_keep` / `backup_pull_keep` | `48` | Nombre d'archives gardées (les plus récentes) |
 | `savegame_backup_dir` | `/var/backups/savegames` | Archives sur la VM |
 | `backup_pull_dir` | `/srv/backups/savegames` | Archives sur le Proxmox principal |
 

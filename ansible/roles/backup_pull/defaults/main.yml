@@ -10,7 +10,7 @@ backup_pull_sources: []
 # Remote user and options of the savegame_backup role
 backup_pull_remote_user: savegame-backup
 
-# 15 minutes after the archives of the game VMs (every 6 hours)
-backup_pull_schedule: "00/6:15"
-backup_pull_keep_days: 7
-backup_pull_keep_min: 28
+# Every hour, 15 minutes after the archives of the game VMs
+backup_pull_schedule: "*:15"
+# Most recent archives kept per game VM, whatever their age
+backup_pull_keep: 48
